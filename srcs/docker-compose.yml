@@ -1,0 +1,107 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    docker-compose.yml                                 :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: sthiagar <marvin@42.fr>                    +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2025/01/21 19:54:40 by sthiagar          #+#    #+#              #
+#    Updated: 2025/01/21 19:57:39 by sthiagar         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+#version: I don't need to specify in Docker Compose V2 or newer
+
+x-volumes:
+  nginx_volumes: &nginx_volumes
+    - ./requirements/nginx/conf/custom.conf:/etc/nginx/nginx.conf #custom confiq
+    - ./requirements/nginx/html/http/index.html:/var/www/html/http/index.html
+    - ./requirements/nginx/html/https/index2.html:/var/www/html/https/index2.html
+    - ./requirements/nginx/log:/var/log/nginx #access amd error logs
+    - ./requirements/shared:/var/www/html #WordPress files shared with php-fpm
+
+services:
+  nginx:
+    image: "${NGINX_IMG:-nginx}"
+
+    build:
+      context: ./requirements/nginx
+      args:
+        DEBIAN_VERSION: ${DEBIAN_VERSION} #default value in Dockerfile
+
+    container_name: "${NGINX_CONTAINER:-mynginx}"
+
+    ports:
+      - "8080:80"   #80 is privileged port? or allow by modifying /etc/sysctl.conf
+      - "8443:443"	#443 is privileged port? or allow by modifying /etc/sysctl.conf
+
+    volumes: *nginx_volumes
+
+    networks:
+      - frontend
+        #name: frontend
+    restart: always
+
+  wordpress:
+    image: "${WORDPRESS_IMG:-wordpress}"	
+    build:
+      context: ./requirements/wordpress
+      args:
+        DEBIAN_VERSION: ${DEBIAN_VERSION} #default value in Dockerfile
+    container_name: "${WP_CONTAINER:-mywordpress}"
+    environment:
+      WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+    #ports:
+    #  -"9000:9000" #Not exposed. Communicates with NGINX via fastCGI
+    volumes:
+      #- ./requirements/wordpress/conf/custom.conf:/etc/php/8.2/fpm/pool.d/custom.conf
+      - ./requirements/wordpress/log:/var/log/php-fpm.log #php-fpm logs
+      - ./requirements/shared:/var/www/html #wordpress files
+      #- ./wordpress/conf/wp-config.php:/var/www/html/wp-config.php
+
+    networks:
+      - frontend
+        #name: frontend
+      - backend
+        #name: backend
+    restart: always
+
+  mariadb:
+    image: "${MARIADB_IMG:-mariadb}"
+    build:
+      context: ./requirements/mariadb
+      #args:
+      #  MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    container_name: "${MDB_CONTAINER:-mymariadb}"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./requirements/mariadb/conf/custom.conf:/etc/mysql/mariadb.conf.d/50-server.cnf
+#      - db_data:/var/lib/mysql
+    networks:
+      - frontend
+        #name: frontend
+#    restart: always
+
+#volumes:
+#  wordpress_data:
+#  db_data:
+
+networks:
+  frontend:
+    name: ${FRONTEND}
+    driver: bridge
+  backend:
+    name: ${BACKEND}
+    driver: bridge
+    
+    
+
