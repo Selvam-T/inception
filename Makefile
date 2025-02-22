@@ -12,6 +12,7 @@
 
 #GIT HUB PERSONAL ACCESS TOKEN FOR GIT HUB SETUP ON VM - (to be removed)
 # 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
+
 include ./srcs/.env
 
 PROJECT_NAME =	inception
@@ -23,7 +24,7 @@ all:	build up
 
 build:
 	@echo "$(YELLOW)Building Docker images with Debian...$(RESET)"
-	docker-compose -f ./srcs/docker-compose.yml build
+	docker compose -f ./srcs/docker-compose.yml build
 	@echo "$(YELLOW)Validating Docker images...$(RESET)"
 	@docker images $(NGINX_IMG) | grep $(NGINX_IMG) || \
 		bash -c 'echo "NGINX image not found! Build failed."; exit 1; '
@@ -36,11 +37,11 @@ rebuild: down all
 
 up:
 	@echo "$(YELLOW)Starting the application in the background...$(RESET)"
-	docker-compose -f ./srcs/docker-compose.yml up -d
-	
+	docker compose -f ./srcs/docker-compose.yml up -d
+
 down:
 	@echo "$(YELLOW)Stopping and removing containers...$(RESET)"
-	docker-compose -f ./srcs/docker-compose.yml down --rmi all
+	docker compose -f ./srcs/docker-compose.yml down --rmi all
 
 clean:	down
 	@echo "$(YELLOW)Removing unused images and volumes...$(RESET)"
@@ -50,13 +51,12 @@ clean:	down
 	#@docker volume prune -f
 
 logs:
-	docker-compose -f ./srcs/docker-compose.yml logs
+	docker compose -f ./srcs/docker-compose.yml logs
 
 update:
 	@echo "$(YELLOW)Updating images...$(RESET)"
-	docker-compose -f ./srcs/docker-compose.yml pull
+	docker compose -f ./srcs/docker-compose.yml pull
 	$(MAKE) build
-
 
 # ******************** DEBUGGING COMMANDS ********************** #
 wp-bash:
@@ -70,7 +70,7 @@ nginx-bash:
 mdb-bash:
 	@echo "$(YELLOW)bash into mariadb container...$(RESET)"
 	@docker exec -it $(MDB_CONTAINER) bash
-	
+
 network:
 	@echo "$(YELLOW)Display all networks...$(RESET)"
 	@docker network ls
@@ -78,7 +78,7 @@ network:
 	@docker network inspect $(FRONTEND)
 	@echo "$(YELLOW)Inspect $(BACKEND)...$(RESET)"
 	@docker network inspect $(BACKEND)
-	
+
 #check_volumes:
 
 #check_networks:

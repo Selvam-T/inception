@@ -23,17 +23,16 @@ x-volumes:
 services:
   nginx:
     image: "${NGINX_IMG:-nginx}"
-
+    
     build:
       context: ./requirements/nginx
       args:
         DEBIAN_VERSION: ${DEBIAN_VERSION} #default value in Dockerfile
-
     container_name: "${NGINX_CONTAINER:-mynginx}"
 
     ports:
       - "8080:80"   #80 is privileged port? or allow by modifying /etc/sysctl.conf
-      - "8443:443"	#443 is privileged port? or allow by modifying /etc/sysctl.conf
+      - "8443:443"  #443 is privileged port? or allow by modifying /etc/sysctl.conf
 
     volumes: *nginx_volumes
 
@@ -43,7 +42,7 @@ services:
     restart: always
 
   wordpress:
-    image: "${WORDPRESS_IMG:-wordpress}"	
+    image: "${WORDPRESS_IMG:-wordpress}"
     build:
       context: ./requirements/wordpress
       args:
@@ -102,6 +101,3 @@ networks:
   backend:
     name: ${BACKEND}
     driver: bridge
-    
-    
-
