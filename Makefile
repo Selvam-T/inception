@@ -10,6 +10,8 @@
 #                                                                              #
 # **************************************************************************** #
 
+#GIT HUB PERSONAL ACCESS TOKEN FOR GIT HUB SETUP ON VM - (to be removed)
+# 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
 include ./srcs/.env
 
 PROJECT_NAME =	inception
