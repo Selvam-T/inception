@@ -11,15 +11,7 @@
 # **************************************************************************** #
 
 #version: I don't need to specify in Docker Compose V2 or newer
-
-x-volumes:
-  nginx_volumes: &nginx_volumes
-    - ./requirements/nginx/conf/custom.conf:/etc/nginx/nginx.conf #custom confiq
-    - ./requirements/nginx/html/http/index.html:/var/www/html/http/index.html
-    - ./requirements/nginx/html/https/index2.html:/var/www/html/https/index2.html
-    - ./requirements/nginx/log:/var/log/nginx #access amd error logs
-    - ./requirements/shared:/var/www/html #WordPress files shared with php-fpm
-
+ 
 services:
   nginx:
     image: "${NGINX_IMG:-nginx}"
@@ -31,14 +23,16 @@ services:
     container_name: "${NGINX_CONTAINER:-mynginx}"
 
     ports:
-      - "8080:80"   #80 is privileged port? or allow by modifying /etc/sysctl.conf
-      - "8443:443"  #443 is privileged port? or allow by modifying /etc/sysctl.conf
+      - "8443:443"  #443 is privileged port
 
-    volumes: *nginx_volumes
+    volumes:
+      - ./requirements/nginx/conf/custom.conf:/etc/nginx/nginx.conf #custom confiq
+      - ./requirements/shared:/var/www/html/wordpress #dynamic files from php-fpm
+      - ./requirements/nginx/html/index.html:/var/www/html/static/index.html #static file
+      - ./requirements/nginx/log:/var/log/nginx #access amd error logs
 
     networks:
-      - frontend
-        #name: frontend
+      - app-network
     restart: always
 
   wordpress:
@@ -56,16 +50,12 @@ services:
     #ports:
     #  -"9000:9000" #Not exposed. Communicates with NGINX via fastCGI
     volumes:
-      #- ./requirements/wordpress/conf/custom.conf:/etc/php/8.2/fpm/pool.d/custom.conf
       - ./requirements/wordpress/log:/var/log/php-fpm.log #php-fpm logs
       - ./requirements/shared:/var/www/html #wordpress files
       #- ./wordpress/conf/wp-config.php:/var/www/html/wp-config.php
 
     networks:
-      - frontend
-        #name: frontend
-      - backend
-        #name: backend
+      - app-network
     restart: always
 
   mariadb:
@@ -86,8 +76,7 @@ services:
       - ./requirements/mariadb/conf/custom.conf:/etc/mysql/mariadb.conf.d/50-server.cnf
 #      - db_data:/var/lib/mysql
     networks:
-      - frontend
-        #name: frontend
+      - app-network
 #    restart: always
 
 #volumes:
@@ -95,9 +84,6 @@ services:
 #  db_data:
 
 networks:
-  frontend:
-    name: ${FRONTEND}
-    driver: bridge
-  backend:
-    name: ${BACKEND}
+  app-network:
+    name: ${APPNETWORK}
     driver: bridge

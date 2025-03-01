@@ -1,1 +1,5 @@
-#
+#To prevent copying files into the container during the build process from the build context i.e. ./requirements/nginx
+
+#.git and .env is outside the context of nginx build
+# nginx.conf.default is not to be found in /etc/nginx/conf.d 
+#so I didn't include them in .dockerignore
