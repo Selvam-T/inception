@@ -53,7 +53,6 @@ services:
       - ./requirements/wordpress/log:/var/log/php-fpm.log #php-fpm logs
       - ./requirements/shared:/var/www/html #wordpress files
       #- ./wordpress/conf/wp-config.php:/var/www/html/wp-config.php
-
     networks:
       - app-network
     restart: always
@@ -70,8 +69,8 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    ports:
-      - "3307:3306"
+    #ports:
+    #  - "3307:3306" # not allowed to access frm outside
     volumes:
       - ./requirements/mariadb/conf/custom.conf:/etc/mysql/mariadb.conf.d/50-server.cnf
 #      - db_data:/var/lib/mysql
