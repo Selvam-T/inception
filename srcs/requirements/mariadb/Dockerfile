@@ -8,6 +8,8 @@ RUN apt update && apt upgrade -y
 
 RUN apt install -y mariadb-server
 
+RUN apt install -y mariadb-client
+
 #configure MariaDB
 RUN mariadb-install-db --user=mysql
 

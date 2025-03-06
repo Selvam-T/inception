@@ -22,6 +22,9 @@ RUN apt install php-fpm -y
 # provides mysqli extension, don't be confused with php-mysql
 RUN apt install php-mysql -y
 
+#to connect to the database
+RUN apt install -y mariadb-client
+
 #for debugging network
 RUN apt install iputils-ping -y 
 RUN apt install iproute2 -y

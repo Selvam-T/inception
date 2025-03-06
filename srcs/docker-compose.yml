@@ -69,18 +69,17 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    #ports:
-    #  - "3307:3306" # not allowed to access frm outside
+
     volumes:
       - ./requirements/mariadb/conf/custom.conf:/etc/mysql/mariadb.conf.d/50-server.cnf
-#      - db_data:/var/lib/mysql
+      - db_data:/var/lib/mysql
     networks:
       - app-network
-#    restart: always
+    restart: always
 
-#volumes:
-#  wordpress_data:
-#  db_data:
+volumes:
+  wordpress_data:
+  db_data:
 
 networks:
   app-network:
