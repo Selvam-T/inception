@@ -24,11 +24,10 @@ services:
 
     ports:
       - "8443:443"  #443 is privileged port
-
     volumes:
-      - ./requirements/nginx/conf/custom.conf:/etc/nginx/nginx.conf #custom confiq
-      - ./requirements/shared:/var/www/html/wordpress #dynamic files from php-fpm
       - ./requirements/nginx/html/index.html:/var/www/html/static/index.html #static file
+      - wp_files:/var/www/html/wordpress #dynamic files from php-fpm
+      - ./requirements/nginx/conf/custom.conf:/etc/nginx/nginx.conf #custom confiq
       - ./requirements/nginx/log:/var/log/nginx #access amd error logs
 
     networks:
@@ -47,11 +46,14 @@ services:
       WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
       WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+    depends_on:
+      - mariadb
     #ports:
     #  -"9000:9000" #Not exposed. Communicates with NGINX via fastCGI
     volumes:
+      #- /home/sthiagar/data/wp_files:/var/www/html:wo #wordpress files
+      - wp_files:/var/www/html #wordpress files
       - ./requirements/wordpress/log:/var/log/php-fpm.log #php-fpm logs
-      - ./requirements/shared:/var/www/html #wordpress files
       #- ./wordpress/conf/wp-config.php:/var/www/html/wp-config.php
     networks:
       - app-network
@@ -69,19 +71,30 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-
     volumes:
       - ./requirements/mariadb/conf/custom.conf:/etc/mysql/mariadb.conf.d/50-server.cnf
-      - db_data:/var/lib/mysql
+      #- /home/sthiagar/data/mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
     networks:
       - app-network
     restart: always
-
-volumes:
-  wordpress_data:
-  db_data:
 
 networks:
   app-network:
     name: ${APPNETWORK}
     driver: bridge
+
+volumes:
+  wp_files:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/sthiagar/data/wp_files
+  mysql_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/sthiagar/data/mysql_data
+  
