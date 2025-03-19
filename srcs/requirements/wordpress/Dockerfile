@@ -1,4 +1,8 @@
-ARG DEBIAN_VERSION=bookworm #default value provided
+ARG DEBIAN_VERSION #default value provided
+ARG WORDPRESS_DB_NAME
+ARG WORDPRESS_DB_HOST
+ARG WORDPRESS_DB_USER
+ARG WORDPRESS_DB_PASSWORD
 
 FROM debian:${DEBIAN_VERSION}
 
@@ -10,12 +14,6 @@ RUN apt install wget -y
 
 # B) latest stable version 8.3, did not complete successfully: exit code: 100
 RUN apt install php8.2 -y
-# Alternatively, to auto detect latest stable version and install
-#RUN apt update
-#RUN apt install software-properties-common # provides scripts for managing software repository
-#RUN add-apt-repository ppa:ondrej/php # reliable source
-#RUN apt update  # This second update is needed after adding a new repository
-#RUN apt install php
 
 # C) latest stable version is 8.4
 RUN apt install php-fpm -y
@@ -42,13 +40,20 @@ RUN php wp-cli.phar --info
 # make the file executable and move it to somewhere in your PATH.
 RUN chmod +x wp-cli.phar
 RUN mv wp-cli.phar /usr/local/bin/wp
-
+RUN wp config create \
+        --dbname=${WORDPRESS_DB_NAME} \
+        --dbhost=${WORDPRESS_DB_HOST} \
+        --dbuser=${WORDPRESS_DB_USER} \
+        --dbpass=${WORDPRESS_DB_PASSWORD} \
+        --path=/var/www/html \
+        --allow-root \
+        --skip-check
+RUN echo "DB_NAME: ${WORDPRESS_DB_NAME}" && \
+    echo "DB_USER: ${WORDPRESS_DB_USER}" && \
+    echo "DB_PASS: ${WORDPRESS_DB_PASSWORD}" && \
+    echo "DB_HOST: ${WORDPRESS_DB_HOST}"
 #remove installation files
 RUN rm -rf /var/lib/apt/lists/*
-
-#temp to be removed
-#RUN touch /etc/php/8.2/fpm/pool.d/custom.conf
-#RUN chmod 644 /etc/php/8.2/fpm/pool.d/custom.conf
 
 #edit listen directive
 #RUN echo "listen = 0.0.0.0:9000" >> /etc/php/8.2/fpm/pool.d/www.conf
@@ -56,11 +61,6 @@ RUN sed -i 's/listen = .*/listen = 0.0.0.0:9000/' /etc/php/8.2/fpm/pool.d/www.co
 
 # set permissions for web server to access WordPress files
 RUN chown -R www-data:www-data /var/www/html
-
-#replace php.ini ?
-#COPY php.ini /usr/locl/etc/php
-
-#remove old php.ini files (without creating new image)?
 
 #for NGINX to communicate with PHP-FPM
 EXPOSE 9000

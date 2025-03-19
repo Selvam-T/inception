@@ -21,7 +21,7 @@ all:	build up #copy-cert update-ca
 
 build:	add-host 
 	@echo "$(YELLOW)Building Docker images with Debian...$(RESET)"
-	@docker compose -f ./srcs/docker-compose.yml build
+	@docker compose -f ./srcs/docker-compose.yml build --no-cache
 	@echo "$(YELLOW)Validating Docker images...$(RESET)"
 	@docker images $(NGINX_IMG) | grep $(NGINX_IMG) || \
 		bash -c 'echo "NGINX image not found! Build failed."; exit 1; '
@@ -40,16 +40,19 @@ down:
 	@echo "$(YELLOW)Stopping and removing containers...$(RESET)"
 	@docker compose -f ./srcs/docker-compose.yml down --rmi all
 
-clean:	down
+clean:	down rem-volume
 	@echo "$(YELLOW)Removing unused images and volumes...$(RESET)"
 	#@docker volume rm $(WORDPRESS_VOL) $(DB_VOL) || true
 	#@docker network rm $(NETWORK_NAME) || true
 	@docker system prune -af
 	#@docker volume prune -f
 	#rm -rf $(CERT_PATH)
-
+	
 add-host:
 	@./addhost.sh
+
+rem-volume:
+	@./rmvolume.sh
 
 logs:
 	@docker compose -f ./srcs/docker-compose.yml logs

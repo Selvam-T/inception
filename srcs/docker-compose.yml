@@ -40,18 +40,24 @@ services:
       context: ./requirements/wordpress
       args:
         DEBIAN_VERSION: ${DEBIAN_VERSION} #default value in Dockerfile
+        WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+        WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
+        WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+        WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
     container_name: "${WP_CONTAINER:-mywordpress}"
     environment:
       WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
       WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
       WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+      WORDPRESS_CONFIG_EXTRA:
+        define('WP_HOME', 'https://${DOMAIN_NAME}:${PORT}');
+        define('WP_SITEURL', 'https://${DOMAIN_NAME}:${PORT}/wp-admin');
     depends_on:
       - mariadb
     #ports:
     #  -"9000:9000" #Not exposed. Communicates with NGINX via fastCGI
     volumes:
-      #- /home/sthiagar/data/wp_files:/var/www/html:wo #wordpress files
       - wp_files:/var/www/html #wordpress files
       - ./requirements/wordpress/log:/var/log/php-fpm.log #php-fpm logs
       #- ./wordpress/conf/wp-config.php:/var/www/html/wp-config.php
