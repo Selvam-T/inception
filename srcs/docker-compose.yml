@@ -11,9 +11,11 @@
 # **************************************************************************** #
 
 #version: I don't need to specify in Docker Compose V2 or newer
- 
+
 services:
   nginx:
+    env_file:
+      - .env
     image: "${NGINX_IMG:-nginx}"
     
     build:
@@ -35,15 +37,17 @@ services:
     restart: always
 
   wordpress:
+    env_file:
+      - .env
     image: "${WORDPRESS_IMG:-wordpress}"
     build:
       context: ./requirements/wordpress
       args:
-        DEBIAN_VERSION: ${DEBIAN_VERSION} #default value in Dockerfile
-        WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
-        WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
-        WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
-        WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+        DEBIAN_VERSION: ${DEBIAN_VERSION}
+        #WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+        #WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
+        #WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+        #WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
     container_name: "${WP_CONTAINER:-mywordpress}"
     environment:
       WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
@@ -66,6 +70,8 @@ services:
     restart: always
 
   mariadb:
+    env_file:
+      - .env
     image: "${MARIADB_IMG:-mariadb}"
     build:
       context: ./requirements/mariadb
