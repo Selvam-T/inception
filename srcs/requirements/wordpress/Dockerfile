@@ -1,8 +1,4 @@
 ARG DEBIAN_VERSION=bookworm 
-#ARG WORDPRESS_DB_NAME
-#ARG WORDPRESS_DB_HOST
-#ARG WORDPRESS_DB_USER
-#ARG WORDPRESS_DB_PASSWORD
 
 FROM debian:${DEBIAN_VERSION}
 
@@ -40,20 +36,6 @@ RUN php wp-cli.phar --info
 # make the file executable and move it to somewhere in your PATH.
 RUN chmod +x wp-cli.phar
 RUN mv wp-cli.phar /usr/local/bin/wp
-#RUN wp config create \
-#        --dbname=${WORDPRESS_DB_NAME} \
-#        --dbhost=${WORDPRESS_DB_HOST} \
-#        --dbuser=${WORDPRESS_DB_USER} \
-#        --dbpass=${WORDPRESS_DB_PASSWORD} \
-#        --path=/var/www/html \
-#        --allow-root \
-#        --skip-check
-#RUN touch temp
-#RUN echo "$DEBIAN_VERSION" >> temp
-#RUN echo "DB_NAME: $WORDPRESS_DB_NAME" >> temp
-#RUN echo "DB_USER: $WORDPRESS_DB_USER" >> temp
-#RUN echo "DB_PASS: $WORDPRESS_DB_PASSWORD" >> temp
-#RUN echo "DB_HOST: $WORDPRESS_DB_HOST" >> temp
 
 #remove installation files
 RUN rm -rf /var/lib/apt/lists/*
@@ -65,9 +47,11 @@ RUN sed -i 's/listen = .*/listen = 0.0.0.0:9000/' /etc/php/8.2/fpm/pool.d/www.co
 # set permissions for web server to access WordPress files
 RUN chown -R www-data:www-data /var/www/html
 
-#generate wp-config.php
+# generate 1) wp-config.php
 COPY /tools/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+# 2) custom.conf to update listen directive for FastCGI requests from Nginx
+COPY /conf/custom.conf custom.conf
 
 #for NGINX to communicate with PHP-FPM
 EXPOSE 9000

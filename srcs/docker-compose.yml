@@ -31,10 +31,15 @@ services:
       - wp_files:/var/www/html/wordpress #dynamic files from php-fpm
       - ./requirements/nginx/conf/custom.conf:/etc/nginx/nginx.conf #custom confiq
       - ./requirements/nginx/log:/var/log/nginx #access amd error logs
+      #- ./requirements/nginx/ssl/nginx.crt:/etc/nginx/ssl/nginx.crt  # Mount certificate
+      #- ./requirements/nginx/ssl/nginx.key:/etc/nginx/ssl/nginx.key  # Mount key
 
     networks:
       - app-network
     restart: always
+    
+    depends_on:
+      - wordpress
 
   wordpress:
     env_file:
@@ -64,7 +69,6 @@ services:
     volumes:
       - wp_files:/var/www/html #wordpress files
       - ./requirements/wordpress/log:/var/log/php-fpm.log #php-fpm logs
-      #- ./wordpress/conf/wp-config.php:/var/www/html/wp-config.php
     networks:
       - app-network
     restart: always

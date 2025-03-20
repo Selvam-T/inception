@@ -63,15 +63,15 @@ update:
 	@$(MAKE) build
 
 # ******************** DEBUGGING COMMANDS ********************** #
-wp-bash:
+bash-w:
 	@echo "$(YELLOW)bash into wordpress container...$(RESET)"
 	@docker exec -it $(WP_CONTAINER) bash
 
-nginx-bash:
+bash-n:
 	@echo "$(YELLOW)bash into nginx container...$(RESET)"
 	@docker exec -it $(NGINX_CONTAINER) bash
 
-mdb-bash:
+bash-m:
 	@echo "$(YELLOW)bash into mariadb container...$(RESET)"
 	@docker exec -it $(MDB_CONTAINER) bash
 

@@ -1,4 +1,5 @@
 #!/bin/bash
+# 1) wp-config.php
 wp config create \
     --dbname="${WORDPRESS_DB_NAME}" \
     --dbhost="${WORDPRESS_DB_HOST}" \
@@ -9,4 +10,6 @@ wp config create \
     --skip-check
 wp config set WP_HOME "https://${DOMAIN_NAME}:${PORT}" --type=constant --path=/var/www/html --allow-root
 wp config set WP_SITEURL "https://${DOMAIN_NAME}:${PORT}/wp-admin" --type=constant --path=/var/www/html --allow-root
+echo "wp-config.php created in WordPress container!"
+
 exec "$@"
