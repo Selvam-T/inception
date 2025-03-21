@@ -42,7 +42,7 @@ RUN rm -rf /var/lib/apt/lists/*
 
 #edit listen directive
 #RUN echo "listen = 0.0.0.0:9000" >> /etc/php/8.2/fpm/pool.d/www.conf
-RUN sed -i 's/listen = .*/listen = 0.0.0.0:9000/' /etc/php/8.2/fpm/pool.d/www.conf
+#RUN sed -i "s/listen = .*/listen = 0.0.0.0:9000/" /etc/php/8.2/fpm/pool.d/www.conf
 
 # set permissions for web server to access WordPress files
 RUN chown -R www-data:www-data /var/www/html
@@ -50,8 +50,9 @@ RUN chown -R www-data:www-data /var/www/html
 # generate 1) wp-config.php
 COPY /tools/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
 # 2) custom.conf to update listen directive for FastCGI requests from Nginx
-COPY /conf/custom.conf custom.conf
+#COPY /conf/custom.conf custom.conf
 
 #for NGINX to communicate with PHP-FPM
 EXPOSE 9000

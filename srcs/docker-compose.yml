@@ -25,7 +25,10 @@ services:
     container_name: "${NGINX_CONTAINER:-mynginx}"
 
     ports:
-      - "8443:443"  #443 is privileged port
+      - "443:443"
+    secrets:
+      - key
+      - cert
     volumes:
       - ./requirements/nginx/html/index.html:/var/www/html/static/index.html #static file
       - wp_files:/var/www/html/wordpress #dynamic files from php-fpm
@@ -55,13 +58,19 @@ services:
         #WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
     container_name: "${WP_CONTAINER:-mywordpress}"
     environment:
+      PHP_FPM_BIND_ADDR: ${PHP_FPM_BIND_ADDR}
+      PHP_FPM_PORT: ${PHP_FPM_PORT}
+      #WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}:3306 ?
       WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
       WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
-      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      #WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WORDPRESS_DB_PASSWORD_FILE: "/run/secrets/db_password"
       WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
       WORDPRESS_CONFIG_EXTRA:
         define('WP_HOME', 'https://${DOMAIN_NAME}:${PORT}');
         define('WP_SITEURL', 'https://${DOMAIN_NAME}:${PORT}/wp-admin');
+    secrets:
+      - db_password
     depends_on:
       - mariadb
     #ports:
@@ -83,13 +92,17 @@ services:
       #  MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     container_name: "${MDB_CONTAINER:-mymariadb}"
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      #MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD} 
+      MYSQL_ROOT_PASSWORD_FILE: "/run/secrets/db_root_password"
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      #MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_PASSWORD_FILE: "/run/secrets/db_password"
+    secrets:
+      - db_password
+      - db_root_password
     volumes:
       - ./requirements/mariadb/conf/custom.conf:/etc/mysql/mariadb.conf.d/50-server.cnf
-      #- /home/sthiagar/data/mysql_data:/var/lib/mysql
       - mysql_data:/var/lib/mysql
     networks:
       - app-network
@@ -113,4 +126,11 @@ volumes:
       type: none
       o: bind
       device: /home/sthiagar/data/mysql_data
-  
+      
+secrets:
+  db_password:
+    file: ${MYSQL_PASSWORD_FILE}
+  db_root_password:
+    file: ${MYSQL_ROOT_PASSWORD_FILE}
+  key: ${SSL_KEY}
+  cert: ${SSL_CERT}

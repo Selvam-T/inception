@@ -1,0 +1,7 @@
+#!/bin/bash
+#Generate self-signed certificate using openssl
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout /home/sthiagar/inception/secrets/nginx.key \
+        -out /home/sthiagar/inception/secrets/nginx.crt \
+        -subj "/C=US/ST=California/L=Local/O=Localhost/OU=Localhost/CN=localhost"
+exec "$@"
