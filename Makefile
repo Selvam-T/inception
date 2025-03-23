@@ -42,10 +42,12 @@ down:
 
 clean:	down rm-files
 	@echo "$(YELLOW)Removing unused images and volumes...$(RESET)"
-	#@docker volume rm $(WORDPRESS_VOL) $(DB_VOL) || true
-	#@docker network rm $(NETWORK_NAME) || true
-	@docker system prune -af
-	#@docker volume prune -f
+	@docker system prune -f # images
+	
+	@docker volume prune -f # volumes
+	@docker volume rm srcs_db_data srcs_mysql_data srcs_wp_files
+	
+	#@docker network rm ${NETWORK_NAME} || true
 	#rm -rf $(CERT_PATH)
 	
 add-host:
