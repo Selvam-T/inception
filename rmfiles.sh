@@ -1,4 +1,5 @@
 #!/bin/bash
+#echo "ROOT_PWD in Script: ${ROOT_PWD}"
 if [ "$(ls -A /home/sthiagar/data/wp_files 2>/dev/null)" ]; then
 	echo "Remove Wordpress mounted volume files ..."
 	echo "inception123" | sudo -S chmod -R 755 /home/sthiagar/data/wp_files
@@ -14,3 +15,6 @@ if [ "$(ls -A /home/sthiagar/data/mysql_data 2>/dev/null)" ]; then
 	echo "inception123" | sudo -S chown -R ${USER}:${USER} /home/sthiagar/data/mysql_data
 	echo "Database volume mounted files removed!"
 fi
+echo "Remove Secrets ..."
+rm -rf /home/sthiagar/inception/secrets/nginx.* > /dev/null
+echo -e "\tSecret files removed!"

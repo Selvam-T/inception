@@ -132,5 +132,7 @@ secrets:
     file: ${MYSQL_PASSWORD_FILE}
   db_root_password:
     file: ${MYSQL_ROOT_PASSWORD_FILE}
-  key: ${SSL_KEY}
-  cert: ${SSL_CERT}
+  key:
+    file: ${SSL_KEY}
+  cert:
+    file: ${SSL_CERT}

@@ -19,7 +19,7 @@ RESET = \033[0m
 
 all:	build up #copy-cert update-ca
 
-build:	add-host 
+build:	add-host generate-ssl
 	@echo "$(YELLOW)Building Docker images with Debian...$(RESET)"
 	@docker compose -f ./srcs/docker-compose.yml build --no-cache
 	@echo "$(YELLOW)Validating Docker images...$(RESET)"
@@ -40,7 +40,7 @@ down:
 	@echo "$(YELLOW)Stopping and removing containers...$(RESET)"
 	@docker compose -f ./srcs/docker-compose.yml down --rmi all
 
-clean:	down rem-volume
+clean:	down rm-files
 	@echo "$(YELLOW)Removing unused images and volumes...$(RESET)"
 	#@docker volume rm $(WORDPRESS_VOL) $(DB_VOL) || true
 	#@docker network rm $(NETWORK_NAME) || true
@@ -51,9 +51,12 @@ clean:	down rem-volume
 add-host:
 	@./addhost.sh
 
-rem-volume:
-	@./rmvolume.sh
+rm-files:
+	#@ROOT_PWD=$(ROOT_PWD) ./rmfiles.sh
+	@./rmfiles.sh
 
+generate-ssl:
+	@./generate_ssl.sh
 
 logs:
 	@docker compose -f ./srcs/docker-compose.yml logs
