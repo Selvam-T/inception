@@ -17,7 +17,7 @@ PROJECT_NAME =	inception
 YELLOW = \033[33m
 RESET = \033[0m 
 
-all:	build up #copy-cert update-ca
+all:	build up
 
 build:	add-host generate-ssl
 	@echo "$(YELLOW)Building Docker images with Debian...$(RESET)"
@@ -45,7 +45,7 @@ clean:	down rm-files
 	@docker system prune -f # images
 	
 	@docker volume prune -f # volumes
-	@docker volume rm srcs_db_data srcs_mysql_data srcs_wp_files
+	@docker volume rm srcs_mysql_data srcs_wp_files
 	
 	#@docker network rm ${NETWORK_NAME} || true
 	#rm -rf $(CERT_PATH)
@@ -54,8 +54,7 @@ add-host:
 	@./addhost.sh
 
 rm-files:
-	#@ROOT_PWD=$(ROOT_PWD) ./rmfiles.sh
-	@./rmfiles.sh
+	@ROOT_PWD=$(ROOT_PWD) ./rmfiles.sh
 
 generate-ssl:
 	@./generate_ssl.sh
