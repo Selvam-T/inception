@@ -1,4 +1,5 @@
-ARG DEBIAN_VERSION=bookworm 
+ARG DEBIAN_VERSION=bullseye
+ARG PHP_VER=7.4
 
 FROM debian:${DEBIAN_VERSION}
 
@@ -8,12 +9,17 @@ WORKDIR /var/www/html
 RUN apt update && apt upgrade -y
 RUN apt install wget -y
 
-# B) latest stable version 8.3, did not complete successfully: exit code: 100
-RUN apt install php8.2 -y
+# B) php7.4 default version for bullseye
+RUN apt install php${PHP_VER} -y
 
 # C) latest stable version is 8.4
 RUN apt install php-fpm -y
-# provides mysqli extension, don't be confused with php-mysql
+
+# to store PHP-FPM process ID file (php-fpm.pid)
+# PHP8.2 creates by default, PHP7.4 does not
+RUN mkdir -p /run/php
+
+# D) provides mysqli extension, don't be confused with php-mysql
 RUN apt install php-mysql -y
 
 #to connect to the database
@@ -41,11 +47,12 @@ RUN mv wp-cli.phar /usr/local/bin/wp
 RUN rm -rf /var/lib/apt/lists/*
 
 #edit listen directive
-#RUN echo "listen = 0.0.0.0:9000" >> /etc/php/8.2/fpm/pool.d/www.conf
-#RUN sed -i "s/listen = .*/listen = 0.0.0.0:9000/" /etc/php/8.2/fpm/pool.d/www.conf
+#RUN echo "listen = 0.0.0.0:9000" >> /etc/php/${PHP_VER}/fpm/pool.d/www.conf
+#RUN sed -i "s/listen = .*/listen = 0.0.0.0:9000/" /etc/php/${PHP_VER}/fpm/pool.d/www.conf
 
 # set permissions for web server to access WordPress files
 RUN chown -R www-data:www-data /var/www/html
+RUN chmod -R 755 /var/www/html
 
 # generate 1) wp-config.php
 COPY /tools/entrypoint.sh /entrypoint.sh
@@ -58,5 +65,5 @@ RUN chmod +x /entrypoint.sh
 EXPOSE 9000
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["php-fpm8.2", "-F"]
+#CMD ["sh", "-c", "php-fpm7.4" "-F"]
 #or ENTRYPOINT ["php-fpm", "-F"] #cannot be overriden

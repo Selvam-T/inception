@@ -15,6 +15,7 @@ include ./srcs/.env
 PROJECT_NAME =	inception
 
 YELLOW = \033[33m
+GREEN = \033[32m
 RESET = \033[0m 
 
 all:	build up
@@ -42,14 +43,32 @@ down:
 
 clean:	down rm-files
 	@echo "$(YELLOW)Removing unused images and volumes...$(RESET)"
-	@docker system prune -f # images
+	@docker system prune -f >/dev/null 2>&1 # images
 	
-	@docker volume prune -f # volumes
-	@docker volume rm srcs_mysql_data srcs_wp_files
+	@docker volume prune -f >/dev/null 2>&1 # volumes
+
+	@echo "$(YELLOW)Removing WordPress files and MYSQL data on host...$(RESET)"
+	@if docker volume inspect srcs_mysql_data >/dev/null 2>&1; then \
+		docker volume rm srcs_mysql_data >/dev/null 2>&1; \
+		echo "$(GREEN)srcs_mysql_data removed !$(RESET)"; \
+	fi
+	@if docker volume inspect srcs_wp_files >/dev/null 2>&1; then \
+		docker volume rm srcs_wp_files >/dev/null 2>&1; \
+		echo "$(GREEN)srcs_wp_files removed !$(RESET)"; \
+	fi
+
+	@echo "$(YELLOW)Removing network...$(RESET)"
+	@if docker network inspect ${APP_NETWORK} >/dev/null 2>&1; then \
+		echo "Network ${APP_NETWORK} found"; \
+		docker network rm ${APP_NETWORK} && \
+		echo "$(GREEN)${APP_NETWORK} removed !$(RESET)"; \
+	fi
 	
-	#@docker network rm ${NETWORK_NAME} || true
-	#rm -rf $(CERT_PATH)
-	
+update:
+	@echo "$(YELLOW)Updating images...$(RESET)"
+	@docker compose -f ./srcs/docker-compose.yml pull
+	@$(MAKE) build
+
 add-host:
 	@./addhost.sh
 
@@ -59,15 +78,7 @@ rm-files:
 generate-ssl:
 	@./generate_ssl.sh
 
-logs:
-	@docker compose -f ./srcs/docker-compose.yml logs
-
-update:
-	@echo "$(YELLOW)Updating images...$(RESET)"
-	@docker compose -f ./srcs/docker-compose.yml pull
-	@$(MAKE) build
-
-# ******************** DEBUGGING COMMANDS ********************** #
+# ******************** DIAGNOSTIC COMMANDS ********************** #
 bash-w:
 	@echo "$(YELLOW)bash into wordpress container...$(RESET)"
 	@docker exec -it $(WP_CONTAINER) bash
@@ -83,18 +94,33 @@ bash-m:
 network:
 	@echo "$(YELLOW)Display all networks...$(RESET)"
 	@docker network ls
-	@echo "$(YELLOW)Inspect $(FRONTEND)...$(RESET)"
-	@docker network inspect $(FRONTEND)
-	@echo "$(YELLOW)Inspect $(BACKEND)...$(RESET)"
-	@docker network inspect $(BACKEND)
+	@echo "$(YELLOW)Containers connected to <$(APP_NETWORK)>...$(RESET)"
+	@docker network inspect --format \
+		'{{range .Containers}}{{printf "%-15s" .Name}}{{.IPv4Address}}{{"\n"}}{{end}}' ${APP_NETWORK}
+ping:
+	@echo "$(YELLOW)ping test...$(RESET)"
+	@docker exec $(NGINX_CONTAINER) ping -c 1 $(WP_CONTAINER)
+	@echo "\n"
+	@docker exec $(NGINX_CONTAINER) ping -c 1 $(MDB_CONTAINER)
+	@echo "\n"
+	@docker exec $(WP_CONTAINER) ping -c 1 $(NGINX_CONTAINER)
 
-#check_volumes:
+ports:
+	@echo "$(YELLOW)Display Containers and Exposed Ports...$(RESET)"
+	@docker ps --format "{{printf \"%-15s\" .Names}}{{.Ports}}"
 
-#check_networks:
+volume:
+	@echo "$(YELLOW)Display all volumes...$(RESET)"
+	@echo "Volume\t\t\tDevice"
+	@echo "------\t\t\t------"
+	@docker volume inspect --format '{{.Name}}{{"\t\t"}}{{.Options.device}}' \
+		srcs_mysql_data
+	@docker volume inspect --format '{{.Name}}{{"\t\t"}}{{.Options.device}}' \
+		srcs_wp_files
 
-#validate_container_cofigurations:
+logs:
+	@docker compose -f ./srcs/docker-compose.yml logs
 
 #validate TLS settings in NGINX
 
 .PHONY:	build up down clean logs update
-
