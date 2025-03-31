@@ -63,23 +63,27 @@ services:
     secrets:
       - wp_user_password
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
 
     volumes:
       - wp_files:/var/www/html #wordpress files
-      - ./requirements/wordpress/log:/var/log/php-fpm.log #php-fpm logs
+      #- ./requirements/wordpress/log:/var/log/php7.4-fpm.log #php-fpm logs
     networks:
       - app-network
     restart: always
 
   mariadb:
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     env_file:
       - .env
     image: "${MARIADB_IMG:-mariadb}"
     build:
       context: ./requirements/mariadb
-      #args:
-      #  MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     container_name: "${MDB_CONTAINER:-mymariadb}"
     environment:
       MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
@@ -90,10 +94,10 @@ services:
       - wp_user_password
       - db_root_password
     volumes:
-      #- ./requirements/mariadb/tools/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data:/var/lib/mysql
       - ./requirements/mariadb/tools/:/docker-entrypoint-initdb.d/
       - ./requirements/mariadb/conf/custom.conf:/etc/mysql/mariadb.conf.d/50-server.cnf
-      - mysql_data:/var/lib/mysql
+      #- ./requirements/mariadb/log:/var/build_log #??
     networks:
       - app-network
     restart: always

@@ -1,28 +1,29 @@
 #!/bin/bash
 set -e
 
-# Start MySQL in the background
+echo "Executing entrypoint script in MariaDB ..."
+
+#1. Start MySQL in the background
+echo -e "\t1. Starting MySQL in the background ..."
 mysqld_safe --datadir=/var/lib/mysql &
 pid="$!"
 
-# Wait for MySQL to become available
+#2. Wait for MySQL to become available
 until mysqladmin ping -h localhost --silent; do
-    echo "Waiting for database to be ready..."
+    echo -e "\t2. Waiting for database to be ready..."
     sleep 2
 done
 
-# Run any SQL files in the initialization directory
-if [ -d "/docker-entrypoint-initdb.d" ]; then
-    echo "Running initialization scripts..."
-    for f in /docker-entrypoint-initdb.d/*; do
-        case "$f" in
-            *.sql)    echo "Running $f"; mysql < "$f" ;;
-            *.sql.gz) echo "Running $f"; gunzip -c "$f" | mysql ;;
-            *)        echo "Ignoring $f" ;;
-        esac
-    done
+#3. Run initialization SQL file directly if it exists
+if [ -f "/docker-entrypoint-initdb.d/init.sql" ]; then
+    echo -e "\t3. Running initialization script: init.sql"
+    mysql < /docker-entrypoint-initdb.d/init.sql
+else
+    echo -e "\t3. Initialization script not found!"
 fi
 
-# Keep the container running
-echo "MySQL is ready to accept connections"
+#4. Waiting for the MySQL process to complete
+echo -e "\t4. MySQL is ready to accept connections ..."
 wait $pid
+
+#5. Check if Database, Users table in Database is created

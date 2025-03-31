@@ -3,6 +3,8 @@ ARG PHP_VER=7.4
 
 FROM debian:${DEBIAN_VERSION}
 
+#RUN echo 'Debian version: $DEBIAN_VERSION' > /var/log/wp.log #custom log file
+
 WORKDIR /var/www/html
 
 # A) install tools
@@ -46,10 +48,6 @@ RUN mv wp-cli.phar /usr/local/bin/wp
 #remove installation files
 RUN rm -rf /var/lib/apt/lists/*
 
-#edit listen directive
-#RUN echo "listen = 0.0.0.0:9000" >> /etc/php/${PHP_VER}/fpm/pool.d/www.conf
-#RUN sed -i "s/listen = .*/listen = 0.0.0.0:9000/" /etc/php/${PHP_VER}/fpm/pool.d/www.conf
-
 # set permissions for web server to access WordPress files
 RUN chown -R www-data:www-data /var/www/html
 RUN chmod -R 755 /var/www/html
@@ -66,4 +64,3 @@ EXPOSE 9000
 
 ENTRYPOINT ["/entrypoint.sh"]
 #CMD ["sh", "-c", "php-fpm7.4" "-F"]
-#or ENTRYPOINT ["php-fpm", "-F"] #cannot be overriden
