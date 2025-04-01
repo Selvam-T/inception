@@ -96,7 +96,8 @@ network:
 	@docker network ls
 	@echo "$(YELLOW)Containers connected to <$(APP_NETWORK)>...$(RESET)"
 	@docker network inspect --format \
-		'{{range .Containers}}{{printf "%-15s" .Name}}{{.IPv4Address}}{{"\n"}}{{end}}' ${APP_NETWORK}
+		'{{range .Containers}}{{printf "%-15s" .Name}}{{.IPv4Address}}{{"\n"}}{{end}}' ${APP_NETWORK} \
+		2>/dev/null || true
 ping:
 	@echo "$(YELLOW)ping test...$(RESET)"
 	@docker exec $(NGINX_CONTAINER) ping -c 1 $(WP_CONTAINER)
@@ -114,9 +115,9 @@ volume:
 	@echo "Volume\t\t\tDevice"
 	@echo "------\t\t\t------"
 	@docker volume inspect --format '{{.Name}}{{"\t\t"}}{{.Options.device}}' \
-		srcs_mysql_data
+		srcs_mysql_data 2>/dev/null || true
 	@docker volume inspect --format '{{.Name}}{{"\t\t"}}{{.Options.device}}' \
-		srcs_wp_files
+		srcs_wp_files 2>/dev/null || true
 
 logs:
 	@docker compose -f ./srcs/docker-compose.yml logs
