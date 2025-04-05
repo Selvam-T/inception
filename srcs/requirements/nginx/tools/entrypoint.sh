@@ -1,7 +1,12 @@
 #!/bin/bash
-#Generate self-signed certificate using openssl
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-        -keyout /home/sthiagar/inception/secrets/nginx.key \
-        -out /home/sthiagar/inception/secrets/nginx.crt \
-        -subj "/C=US/ST=California/L=Local/O=Localhost/OU=Localhost/CN=localhost"
-exec "$@"
+
+set -e
+if cp /mnt/html/index.html /usr/share/nginx/html/index2.html; then
+    echo "/usr/share/nginx/html/index2.html copied successfully." >> /var/log/nginx/nginx-debug.log
+else
+    echo "/usr/share/nginx/html/index2.html copy failed with status $?" >> /var/log/nginx/nginx-debug.log
+fi
+
+exec nginx -g "daemon off;"
+#exec "$@"
+

@@ -11,7 +11,7 @@ wp config create \
     --allow-root \
     --skip-check
 wp config set WP_HOME "https://${DOMAIN_NAME}:${PORT}" --type=constant --path=/var/www/html --allow-root
-wp config set WP_SITEURL "https://${DOMAIN_NAME}:${PORT}/wp-admin" --type=constant --path=/var/www/html --allow-root
+wp config set WP_SITEURL "https://${DOMAIN_NAME}:${PORT}" --type=constant --path=/var/www/html --allow-root
 echo "wp-config.php created in WordPress container!"
 
 # 2) edit PHP-FPM listen directive

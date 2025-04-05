@@ -28,8 +28,8 @@ services:
       - key
       - cert
     volumes:
-      - ./requirements/nginx/html/index.html:/var/www/html/static/index.html #static file
-      - wp_files:/var/www/html/wordpress #dynamic files from php-fpm
+      - ./requirements/nginx/html/index.html:/mnt/html/index.html #static file in tmp target
+      - wp_files:/var/www/html
       - ./requirements/nginx/conf/custom.conf:/etc/nginx/nginx.conf #custom confiq
       - ./requirements/nginx/log:/var/log/nginx #access amd error logs
      

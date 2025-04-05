@@ -25,4 +25,9 @@ RUN chmod -R 755 /var/www/html
 
 EXPOSE 443
 
-CMD ["nginx", "-g" , "daemon off;"]
+# generate 1) wp-config.php
+COPY /tools/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+#CMD ["nginx", "-g" , "daemon off;"]

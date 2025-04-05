@@ -20,7 +20,7 @@ RESET = \033[0m
 
 all:	build up
 
-build:	add-host generate-ssl
+build:	init-host generate-ssl
 	@echo "$(YELLOW)Building Docker images with Debian...$(RESET)"
 	@docker compose -f ./srcs/docker-compose.yml build --no-cache
 	@echo "$(YELLOW)Validating Docker images...$(RESET)"
@@ -47,21 +47,21 @@ clean:	down rm-files
 	
 	@docker volume prune -f >/dev/null 2>&1 # volumes
 
-	@echo "$(YELLOW)Removing WordPress files and MYSQL data on host...$(RESET)"
+	@echo "$(YELLOW)Removing MYSQL data and WordPress files on host...$(RESET)"
 	@if docker volume inspect srcs_mysql_data >/dev/null 2>&1; then \
 		docker volume rm srcs_mysql_data >/dev/null 2>&1; \
-		echo "$(GREEN)srcs_mysql_data removed !$(RESET)"; \
+		echo "\t$(GREEN)srcs_mysql_data removed !$(RESET)"; \
 	fi
 	@if docker volume inspect srcs_wp_files >/dev/null 2>&1; then \
 		docker volume rm srcs_wp_files >/dev/null 2>&1; \
-		echo "$(GREEN)srcs_wp_files removed !$(RESET)"; \
+		echo "\t$(GREEN)srcs_wp_files removed !$(RESET)"; \
 	fi
 
 	@echo "$(YELLOW)Removing network...$(RESET)"
 	@if docker network inspect ${APP_NETWORK} >/dev/null 2>&1; then \
 		echo "Network ${APP_NETWORK} found"; \
 		docker network rm ${APP_NETWORK} && \
-		echo "$(GREEN)${APP_NETWORK} removed !$(RESET)"; \
+		echo -e "\t$(GREEN)${APP_NETWORK} removed !$(RESET)"; \
 	fi
 	
 update:
@@ -69,8 +69,8 @@ update:
 	@docker compose -f ./srcs/docker-compose.yml pull
 	@$(MAKE) build
 
-add-host:
-	@./addhost.sh
+init-host:
+	@./inithost.sh
 
 rm-files:
 	@ROOT_PWD=$(ROOT_PWD) ./rmfiles.sh
@@ -100,11 +100,11 @@ network:
 		2>/dev/null || true
 ping:
 	@echo "$(YELLOW)ping test...$(RESET)"
-	@docker exec $(NGINX_CONTAINER) ping -c 1 $(WP_CONTAINER)
+	@docker exec $(NGINX_CONTAINER) ping -c 1 $(WP_CONTAINER) || true
 	@echo "\n"
-	@docker exec $(NGINX_CONTAINER) ping -c 1 $(MDB_CONTAINER)
+	@docker exec $(NGINX_CONTAINER) ping -c 1 $(MDB_CONTAINER) || true
 	@echo "\n"
-	@docker exec $(WP_CONTAINER) ping -c 1 $(NGINX_CONTAINER)
+	@docker exec $(WP_CONTAINER) ping -c 1 $(NGINX_CONTAINER) || true
 
 ports:
 	@echo "$(YELLOW)Display Containers and Exposed Ports...$(RESET)"
