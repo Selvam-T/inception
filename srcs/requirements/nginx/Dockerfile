@@ -15,7 +15,7 @@ RUN apt install wget -y
 RUN apt install iputils-ping -y 
 RUN apt install iproute2 -y
 
-# apt update downloads package lists and stores then in /var/lib/apt/list/
+# apt update downloads package lists, saves in /var/lib/apt/list/
 # clean up cached package lists to reduce image size
 RUN rm -rf /var/lib/apt/list/*
 
@@ -25,7 +25,7 @@ RUN chmod -R 755 /var/www/html
 
 EXPOSE 443
 
-# generate 1) wp-config.php
+# script mounts custom index.html
 COPY /tools/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 

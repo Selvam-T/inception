@@ -12,43 +12,44 @@
 
 services:
   nginx:
-    env_file:
-      - .env
     image: "${NGINX_IMG:-nginx}"
-    
     build:
       context: ./requirements/nginx
       args:
         DEBIAN_VERSION: ${DEBIAN_VERSION} #default value in Dockerfile
-    container_name: "${NGINX_CONTAINER:-mynginx}"
-
+    depends_on:
+      - wordpress
+    networks:
+      - app-network
     ports:
       - "443:443"
-    secrets:
-      - key
-      - cert
     volumes:
       - ./requirements/nginx/html/index.html:/mnt/html/index.html #static file in tmp target
       - wp_files:/var/www/html
       - ./requirements/nginx/conf/custom.conf:/etc/nginx/nginx.conf #custom confiq
       - ./requirements/nginx/log:/var/log/nginx #access amd error logs
-     
-    networks:
-      - app-network
-    restart: always
-    
-    depends_on:
-      - wordpress
-
-  wordpress:
     env_file:
       - .env
+    secrets:
+      - key
+      - cert
+    restart: always
+    container_name: "${NGINX_CONTAINER:-mynginx}"
+  
+  wordpress:
     image: "${WORDPRESS_IMG:-wordpress}"
     build:
       context: ./requirements/wordpress
       args:
         DEBIAN_VERSION: ${DEBIAN_VERSION}
-    container_name: "${WP_CONTAINER:-mywordpress}"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    networks:
+      - app-network
+    volumes:
+      - wp_files:/var/www/html #wordpress files
+      #- ./requirements/wordpress/log:/var/log/php7.4-fpm.log #php-fpm logs
     environment:
       PHP_FPM_BIND_ADDR: ${PHP_FPM_BIND_ADDR}
       PHP_FPM_PORT: ${PHP_FPM_PORT}
@@ -60,47 +61,41 @@ services:
       WORDPRESS_CONFIG_EXTRA:
         define('WP_HOME', 'https://${DOMAIN_NAME}:${PORT}');
         define('WP_SITEURL', 'https://${DOMAIN_NAME}:${PORT}/wp-admin');
+    env_file:
+      - .env
     secrets:
       - wp_user_password
-    depends_on:
-      mariadb:
-        condition: service_healthy
-
-    volumes:
-      - wp_files:/var/www/html #wordpress files
-      #- ./requirements/wordpress/log:/var/log/php7.4-fpm.log #php-fpm logs
-    networks:
-      - app-network
+    container_name: "${WP_CONTAINER:-mywordpress}"
     restart: always
 
   mariadb:
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    env_file:
-      - .env
     image: "${MARIADB_IMG:-mariadb}"
     build:
       context: ./requirements/mariadb
-    container_name: "${MDB_CONTAINER:-mymariadb}"
-    environment:
-      MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
-      MYSQL_USER: ${WORDPRESS_USER}
-      MYSQL_PASSWORD_FILE: "/run/secrets/wp_user_password"
-      MYSQL_ROOT_PASSWORD_FILE: "/run/secrets/db_root_password"
-    secrets:
-      - wp_user_password
-      - db_root_password
+    networks:
+      - app-network
     volumes:
       - mysql_data:/var/lib/mysql
       - ./requirements/mariadb/tools/:/docker-entrypoint-initdb.d/
       - ./requirements/mariadb/conf/custom.conf:/etc/mysql/mariadb.conf.d/50-server.cnf
       #- ./requirements/mariadb/log:/var/build_log #??
-    networks:
-      - app-network
+    environment:
+      MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
+      MYSQL_USER: ${WORDPRESS_USER}
+      MYSQL_PASSWORD_FILE: "/run/secrets/wp_user_password"
+      MYSQL_ROOT_PASSWORD_FILE: "/run/secrets/db_root_password"
+    env_file:
+      - .env
+    secrets:
+      - wp_user_password
+      - db_root_password
+    container_name: "${MDB_CONTAINER:-mymariadb}"
     restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 networks:
   app-network:

@@ -24,6 +24,13 @@ if [ "$(ls -A /home/sthiagar/inception/secrets/nginx.* 2>/dev/null)" ]; then
         echo -e "\t${GREEN}Secret files removed!${RESET}"
 fi
 
+#rm password files
+if [ "$(ls -A /home/sthiagar/inception/secrets/*.txt 2>/dev/null)" ]; then
+        echo -e "${YELLOW}Remove Passwords ...${RESET}"
+        rm -rf /home/sthiagar/inception/secrets/*.txt > /dev/null
+        echo -e "\t${GREEN}Password files removed!${RESET}"
+fi
+
 #rm log files
 echo -e "${YELLOW}Remove log files ...${RESET}"
 rm -rf /home/sthiagar/inception/srcs/requirements/nginx/log/* > /dev/null

@@ -52,12 +52,9 @@ RUN rm -rf /var/lib/apt/lists/*
 RUN chown -R www-data:www-data /var/www/html
 RUN chmod -R 755 /var/www/html
 
-# generate 1) wp-config.php
+# script generates wp-config.php
 COPY /tools/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-
-# 2) custom.conf to update listen directive for FastCGI requests from Nginx
-#COPY /conf/custom.conf custom.conf
 
 #for NGINX to communicate with PHP-FPM
 EXPOSE 9000

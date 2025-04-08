@@ -27,6 +27,7 @@ EXPOSE 3306
 COPY tools/entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-#USER mysql 
+#USER mysql
+
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 #CMD ["mysqld_safe", "--datadir=/var/lib/mysql"]
