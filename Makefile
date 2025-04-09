@@ -122,6 +122,14 @@ volume:
 logs:
 	@docker compose -f ./srcs/docker-compose.yml logs
 
+list:
+	@echo "$(YELLOW)Listing images ...$(RESET)"
+	@docker images
+	@echo "$(YELLOW)Listing running containers ...$(RESET)"
+	@docker ps
+	@echo "$(YELLOW)Listing all containers ...$(RESET)"
+	@docker ps -a
+	
 #validate TLS settings in NGINX
 
 .PHONY:	build up down clean logs update

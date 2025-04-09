@@ -20,12 +20,16 @@ echo -e "\t${GREEN}nginx.key and nginx.crt generated successfully.${RESET}"
 # Generate random DB passwords
 echo -e "${YELLOW}Generating random DB passwords${RESET}"
 
-if [ ! -f "/home/sthiagar/inception/secrets/db_root_password.txt" ]; then
-        < /dev/urandom tr -dc A-Za-z0-9 | head -c 8 > /home/sthiagar/inception/secrets/db_root_password.txt
-        echo -e "\t${GREEN}db_root_password.txt created successfully.${RESET}"
+if [ ! -f "/home/sthiagar/inception/secrets/db_password.txt" ]; then
+        < /dev/urandom tr -dc A-Za-z0-9 | head -c 8 > /home/sthiagar/inception/secrets/db_password.txt
+        echo -e "\t${GREEN}db_password.txt created successfully.${RESET}"
 fi
 
-if [ ! -f "/home/sthiagar/inception/secrets/wp_user_password.txt" ]; then
-        < /dev/urandom tr -dc A-Za-z0-9 | head -c 8 > /home/sthiagar/inception/secrets/wp_user_password.txt
-        echo -e "\t${GREEN}wp_user_password.txt created successfully.${RESET}"
+if [ ! -f "/home/sthiagar/inception/secrets/wp_password.txt" ]; then
+        {
+                < /dev/urandom tr -dc A-Za-z0-9 | head -c 8; echo
+                < /dev/urandom tr -dc A-Za-z0-9 | head -c 8; echo
+                < /dev/urandom tr -dc A-Za-z0-9 | head -c 8; echo
+        } > /home/sthiagar/inception/secrets/wp_password.txt
+        echo -e "\t${GREEN}wp_password.txt created successfully.${RESET}"
 fi

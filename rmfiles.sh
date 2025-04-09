@@ -39,3 +39,6 @@ rm -rf /home/sthiagar/inception/srcs/requirements/wordpress/log/* > /dev/null
 echo -e "\t${GREEN}WordPress log files removed!${RESET}"
 rm -rf /home/sthiagar/inception/srcs/requirements/mariadb/log/* > /dev/null
 echo -e "\t${GREEN}MariaDB log files removed!${RESET}"
+
+#reset ROOT_PWD in .env
+sed -i "s/ROOT_PWD=.*/ROOT_PWD= #to be updated during make/" ./srcs/.env

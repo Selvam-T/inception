@@ -3,14 +3,22 @@ echo "Executing entrypoint script in WordPress ..."
 
 set -e
 VER=${PHP_VER}
-DB_PASSWORD=$(cat /run/secrets/wp_user_password)
+#DBUSER_PASSWORD=$(cat /run/secrets/wp_password)
+
+DBUSER_PASSWORD=$(sed -n '1p' /run/secrets/wp_password)
+SUP_PASSWORD=$(sed -n '2p' /run/secrets/wp_password)
+REG_PASSWORD=$(sed -n '3p' /run/secrets/wp_password)
+
+echo "Testing DBUSER_PASSWORD : ${DBUSER_PASSWORD}"
+echo "Testing SUP_PASSWORD : ${SUP_PASSWORD}"
+echo "Testing REG_PASSWORD : ${REG_PASSWORD}"
 
 # 1) wp-config.php
 wp config create \
     --dbname="${WORDPRESS_DB_NAME}" \
     --dbhost="${WORDPRESS_DB_HOST}" \
     --dbuser="${WORDPRESS_DB_USER}" \
-    --dbpass="${DB_PASSWORD}" \
+    --dbpass="${DBUSER_PASSWORD}" \
     --path=/var/www/html \
     --allow-root \
     --skip-check

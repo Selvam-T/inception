@@ -57,14 +57,16 @@ services:
       WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
       WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
       WORDPRESS_DB_USER: ${WORDPRESS_USER}
-      WORDPRESS_DB_PASSWORD_FILE: "/run/secrets/wp_user_password"
+      WORDPRESS_SUPER: ${WORDPRESS_SUPER}
+      WORDPRESS_REGULAR: ${WORDPRESS_REGULAR}
+      WORDPRESS_PASSWORD_FILE: "/run/secrets/wp_password"
       WORDPRESS_CONFIG_EXTRA:
         define('WP_HOME', 'https://${DOMAIN_NAME}:${PORT}');
         define('WP_SITEURL', 'https://${DOMAIN_NAME}:${PORT}/wp-admin');
     env_file:
       - .env
     secrets:
-      - wp_user_password
+      - wp_password
     container_name: "${WP_CONTAINER:-mywordpress}"
     restart: always
 
@@ -82,13 +84,14 @@ services:
     environment:
       MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
       MYSQL_USER: ${WORDPRESS_USER}
-      MYSQL_PASSWORD_FILE: "/run/secrets/wp_user_password"
-      MYSQL_ROOT_PASSWORD_FILE: "/run/secrets/db_root_password"
+      MYSQL_USER_PASSWORD_FILE: "/run/secrets/wp_password"
+      MYSQL_ROOT_PASSWORD_FILE: "/run/secrets/db_password"
+      
     env_file:
       - .env
     secrets:
-      - wp_user_password
-      - db_root_password
+      - wp_password
+      - db_password
     container_name: "${MDB_CONTAINER:-mymariadb}"
     restart: always
     healthcheck:
@@ -117,9 +120,9 @@ volumes:
       device: ${MYSQL_DATA}
       
 secrets:
-  wp_user_password:
-    file: ${WORDPRESS_USER_PASSWORD_FILE}
-  db_root_password:
+  wp_password:
+    file: ${WORDPRESS_PASSWORD_FILE}
+  db_password:
     file: ${MYSQL_ROOT_PASSWORD_FILE}
   key:
     file: ${SSL_KEY}

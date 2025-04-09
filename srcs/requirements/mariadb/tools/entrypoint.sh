@@ -3,8 +3,13 @@ echo "Executing entrypoint script in MariaDB ..."
 
 set -e
 
-MYSQL_PASSWORD=$(cat /run/secrets/wp_user_password)
-MYSQL_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
+MYSQL_USER_PASSWORD=$(sed -n '1p' /run/secrets/wp_password)
+#MYSQL_USER_PASSWORD=$(cat /run/secrets/wp_password)
+MYSQL_ROOT_PASSWORD=$(cat /run/secrets/db_password)
+
+#echo "MYSQL_DATABASE inside ENTRYPOINT '$MYSQL_DATABASE'" #delete
+#echo "MYSQL_USER_PASSWORD inside ENTRYPOINT '$MYSQL_USER_PASSWORD'" #delete
+#echo "MYSQL_ROOT_PASSWORD inside ENTRYPOINT '$MYSQL_ROOT_PASSWORD'" #delete
 
 #1. Start MySQL in the background
 echo -e "\t1. Starting MySQL in the background ..."
@@ -20,9 +25,9 @@ done
 if [ -f "/docker-entrypoint-initdb.d/init.sql" ]; then
     echo -e "\t3. Running initialization script: init.sql"
     
-    sed "s/\${MYSQL_DATABASE}/$MYSQL_DATABASE /g; \
-        s/\${MYSQL_USER}/$MYSQL_USER /g; \
-        s/\${MYSQL_PASSWORD}/$MYSQL_PASSWORD /g" \
+    sed "s/\_MYSQL_DATABASE_/$MYSQL_DATABASE/g; \
+        s/\_MYSQL_USER_/$MYSQL_USER/g; \
+        s/\_MYSQL_USER_PASSWORD_/$MYSQL_USER_PASSWORD/g" \
         /docker-entrypoint-initdb.d/init.sql | mysql
 else
     echo -e "\tError: Initialization script not found!"

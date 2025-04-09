@@ -1,0 +1,4 @@
+172.18.0.1 - - [09/Apr/2025:11:54:46 +0000] "GET / HTTP/1.1" 200 4033 "-" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:137.0) Gecko/20100101 Firefox/137.0"
+172.18.0.1 - - [09/Apr/2025:11:54:46 +0000] "GET /favicon.ico HTTP/1.1" 404 153 "https://localhost/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:137.0) Gecko/20100101 Firefox/137.0"
+172.18.0.1 - - [09/Apr/2025:11:54:51 +0000] "GET /wp-admin HTTP/1.1" 301 169 "-" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:137.0) Gecko/20100101 Firefox/137.0"
+172.18.0.1 - - [09/Apr/2025:11:54:51 +0000] "GET /wp-admin/ HTTP/1.1" 500 3127 "-" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:137.0) Gecko/20100101 Firefox/137.0"
