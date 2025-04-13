@@ -24,7 +24,7 @@ services:
     ports:
       - "443:443"
     volumes:
-      - ./requirements/nginx/html/index.html:/mnt/html/index.html #static file in tmp target
+      - ./requirements/nginx/html/selvam.html:/mnt/html/selvam.html #static file
       - wp_files:/var/www/html
       - ./requirements/nginx/conf/custom.conf:/etc/nginx/nginx.conf #custom confiq
       - ./requirements/nginx/log:/var/log/nginx #access amd error logs

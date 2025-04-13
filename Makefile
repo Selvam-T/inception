@@ -163,9 +163,30 @@ version:
 	@echo "$(YELLOW)3. WORDPRESS tools :$(RESET)"
 	@echo "$(YELLOW)-------------------$(RESET)"
 	@docker exec -it $(WP_CONTAINER) bash -c "\
+	cat /etc/os-release | grep PRETTY_NAME | awk -F'\"' '{print \$$2}'; \
 	mariadb --version | awk -F', for' '{print \$$1}'; \
 	mysql --version | awk -F', for' '{print \$$1}'; echo "
 
+error:
+	@echo "$(YELLOW)1. NGINX error log :$(RESET)"
+	@echo "$(YELLOW)--------------------$(RESET)"
+	@docker exec -it $(NGINX_CONTAINER) bash -c "\
+	cat /var/log/nginx/error.log; echo "
+	
+	@echo "$(YELLOW)2. PHP-FPM error log: :$(RESET)"
+	@echo "$(YELLOW)------------------------$(RESET)"
+	@docker exec -it $(WP_CONTAINER) bash -c "\
+	cat /var/log/php7.4-fpm.log; echo "
+	
+	@echo "$(YELLOW)3. MARIADB error log: :$(RESET)"
+	@echo "$(YELLOW)------------------------$(RESET)"
+	@docker exec -it $(MDB_CONTAINER) bash -c "\
+	cat /var/log/mysql/error.log; echo "
+	
+	@echo "$(YELLOW)4. MARIADB General log: :$(RESET)"
+	@echo "$(YELLOW)------------------------$(RESET)"
+	@docker exec -it $(MDB_CONTAINER) bash -c "\
+	cat /var/log/mysql/mysql.log; echo "
 	
 wp-config:
 	@docker exec -it $(WP_CONTAINER) bash -c "\
