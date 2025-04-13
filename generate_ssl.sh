@@ -18,7 +18,7 @@ exec "$@"
 echo -e "\t${GREEN}nginx.key and nginx.crt generated successfully.${RESET}"
 
 # Generate random DB passwords
-echo -e "${YELLOW}Generating random DB passwords${RESET}"
+echo -e "${YELLOW}Generating random DB and WordPress passwords${RESET}"
 
 if [ ! -f "/home/sthiagar/inception/secrets/db_password.txt" ]; then
         < /dev/urandom tr -dc A-Za-z0-9 | head -c 8 > /home/sthiagar/inception/secrets/db_password.txt

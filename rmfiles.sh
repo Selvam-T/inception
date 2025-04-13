@@ -33,12 +33,21 @@ fi
 
 #rm log files
 echo -e "${YELLOW}Remove log files ...${RESET}"
-rm -rf /home/sthiagar/inception/srcs/requirements/nginx/log/* > /dev/null
-echo -e "\t${GREEN}Nginx log files removed!${RESET}"
-rm -rf /home/sthiagar/inception/srcs/requirements/wordpress/log/* > /dev/null
-echo -e "\t${GREEN}WordPress log files removed!${RESET}"
-rm -rf /home/sthiagar/inception/srcs/requirements/mariadb/log/* > /dev/null
-echo -e "\t${GREEN}MariaDB log files removed!${RESET}"
+
+if [ "$(ls -A /home/sthiagar/inception/srcs/requirements/nginx/log/* 2>/dev/null)" ]; then
+        rm -rf /home/sthiagar/inception/srcs/requirements/nginx/log/* > /dev/null
+        echo -e "\t${GREEN}Nginx log files removed!${RESET}"
+fi
+
+if [ "$(ls -A /home/sthiagar/inception/srcs/requirements/wordpress/log/* 2>/dev/null)" ]; then
+        rm -rf /home/sthiagar/inception/srcs/requirements/wordpress/log/* > /dev/null
+        echo -e "\t${GREEN}WordPress log files removed!${RESET}"
+fi
+
+if [ "$(ls -A /home/sthiagar/inception/srcs/requirements/mariadb/log/* 2>/dev/null)" ]; then
+        rm -rf /home/sthiagar/inception/srcs/requirements/mariadb/log/* > /dev/null
+        echo -e "\t${GREEN}MariaDB log files removed!${RESET}"
+fi
 
 #reset ROOT_PWD in .env
 sed -i "s/ROOT_PWD=.*/ROOT_PWD= #to be updated during make/" ./srcs/.env

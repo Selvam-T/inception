@@ -4,16 +4,16 @@ YELLOW="\033[33m"
 GREEN="\033[32m"
 RESET="\033[0m" 
 
-echo -n "Please provide sudo root password: "
-read choice
+echo -n "Please provide sudo root password: "; read -s pwd; echo;
+
 echo -e "\t${GREEN}ROOT_PWD in .env updated !${RESET}"
-sed -i "s/ROOT_PWD=.*/ROOT_PWD=$choice/" ./srcs/.env
+sed -i "s/ROOT_PWD=.*/ROOT_PWD=$pwd/" ./srcs/.env
 
 echo -e "${YELLOW}Executing host initialization script ...${RESET}"
 
 if ! grep -q "127.0.0.1 sthiagar.42.fr" /etc/hosts; then
         # modifying /etc/hosts requires root access but I must test this block again
-	echo "127.0.0.1 sthiagar.42.fr" | sudo tee -a /etc/hosts
+	echo pwd | sudo -S bash -c 'echo "127.0.0.1 sthiagar.42.fr" >> /etc/hosts'
 	echo -e "\t${GREEN}1. sthiagar.42.fr host name added to /etc/hosts.${RESET}"
 else
 	echo -e "\t${GREEN}1. sthiagar.42.fr is present in /etc/hosts${RESET}"	

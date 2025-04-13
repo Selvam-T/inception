@@ -3,8 +3,6 @@ ARG PHP_VER=7.4
 
 FROM debian:${DEBIAN_VERSION}
 
-#RUN echo 'Debian version: $DEBIAN_VERSION' > /var/log/wp.log #custom log file
-
 WORKDIR /var/www/html
 
 # A) install tools

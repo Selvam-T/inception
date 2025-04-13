@@ -2,8 +2,6 @@ ARG DEBIAN_VERSION=bullseye
 
 FROM debian:${DEBIAN_VERSION}
 
-RUN echo 'Debian version: $DEBIAN_VERSION' > /var/build_log
-
 RUN apt update && apt upgrade -y
 RUN apt install -y mariadb-server
 RUN apt install -y mariadb-client
