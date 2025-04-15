@@ -105,19 +105,19 @@ generate-ssl:
 # ******************** DIAGNOSTIC COMMANDS ********************** #
 bash-w:
 	@echo "$(YELLOW)bash into wordpress container...$(RESET)"
-	@docker exec -it $(WP_CONTAINER) bash
+	@docker exec -it $(WP_CONTAINER) bash || true
 
 bash-n:
 	@echo "$(YELLOW)bash into nginx container...$(RESET)"
-	@docker exec -it $(NGINX_CONTAINER) bash
+	@docker exec -it $(NGINX_CONTAINER) bash || true
 
 bash-m:
 	@echo "$(YELLOW)bash into mariadb container...$(RESET)"
-	@docker exec -it $(MDB_CONTAINER) bash
+	@docker exec -it $(MDB_CONTAINER) bash || true
 
 network:
 	@echo "$(YELLOW)Display all networks...$(RESET)"
-	@docker network ls
+	@docker network ls || true
 	@echo "$(YELLOW)Containers connected to <$(APP_NETWORK)>...$(RESET)"
 	@docker network inspect --format \
 		'{{range .Containers}}{{printf "%-15s" .Name}}{{.IPv4Address}}{{"\n"}}{{end}}' ${APP_NETWORK} \
@@ -132,7 +132,7 @@ ping:
 
 ports:
 	@echo "$(YELLOW)Display Containers and Exposed Ports...$(RESET)"
-	@docker ps --format "{{printf \"%-15s\" .Names}}{{.Ports}}"
+	@docker ps --format "{{printf \"%-15s\" .Names}}{{.Ports}}" || true
 
 volume:
 	@echo "$(YELLOW)Display all volumes...$(RESET)"
@@ -144,21 +144,21 @@ volume:
 		srcs_wp_files 2>/dev/null || true
 
 logs:
-	@docker compose -f ./srcs/docker-compose.yml logs
+	@docker compose -f ./srcs/docker-compose.yml logs || true
 
 list:
 	@echo "$(YELLOW)1. Listing images :$(RESET)"
 	@echo "$(YELLOW)-------------------$(RESET)"
-	@docker images
+	@docker images || true
 	@echo "$(YELLOW)2. Listing running containers :$(RESET)"
 	@echo "$(YELLOW)-------------------------------$(RESET)"
-	@docker ps
+	@docker ps || true
 	@echo "$(YELLOW)3. Listing all containers :$(RESET)"
 	@echo "$(YELLOW)---------------------------$(RESET)"
-	@docker ps -a
+	@docker ps -a || true
 	@echo "$(YELLOW)4. Listing docker compose services :$(RESET)"
 	@echo "$(YELLOW)------------------------------------$(RESET)"
-	@docker compose -f ./srcs/docker-compose.yml config --services
+	@docker compose -f ./srcs/docker-compose.yml config --services || true
 
 version:
 	@echo "$(YELLOW)1. NGINX tools :$(RESET)"
@@ -169,7 +169,7 @@ version:
 	openssl version; \
 	curl -V | head -n 1 | awk -F'libcurl' '{print \$$1}'; \
 	ping -V; \
-	ip -V; echo "
+	ip -V; echo " || true 
 	
 	@echo "$(YELLOW)2. WORDPRESS tools :$(RESET)"
 	@echo "$(YELLOW)-------------------$(RESET)"
@@ -182,65 +182,81 @@ version:
 	|| echo 'Not installed'; \
 	wp --version --allow-root 2>/dev/null || echo 'Not installed'; \
 	ping -V; \
-	ip -V; echo "
+	ip -V; echo " || true
 	
-	@echo "$(YELLOW)3. WORDPRESS tools :$(RESET)"
+	@echo "$(YELLOW)3. MARIADB tools :$(RESET)"
 	@echo "$(YELLOW)-------------------$(RESET)"
-	@docker exec -it $(WP_CONTAINER) bash -c "\
+	@docker exec -it $(MDB_CONTAINER) bash -c "\
 	cat /etc/os-release | grep PRETTY_NAME | awk -F'\"' '{print \$$2}'; \
 	mariadb --version | awk -F', for' '{print \$$1}'; \
-	mysql --version | awk -F', for' '{print \$$1}'; echo "
+	mysql --version | awk -F', for' '{print \$$1}'; echo " || true
 
 error:
 	@echo "$(YELLOW)1. NGINX error log :$(RESET)"
 	@echo "$(YELLOW)--------------------$(RESET)"
 	@docker exec -it $(NGINX_CONTAINER) bash -c "\
-	cat /var/log/nginx/error.log; echo "
+	cat /var/log/nginx/error.log || true " || true
 	
 	@echo "$(YELLOW)2. PHP-FPM error log: :$(RESET)"
 	@echo "$(YELLOW)------------------------$(RESET)"
 	@docker exec -it $(WP_CONTAINER) bash -c "\
-	cat /var/log/php7.4-fpm.log; echo "
+	cat /var/log/php7.4-fpm.log || true " || true
 	
 	@echo "$(YELLOW)3. MARIADB error log: :$(RESET)"
 	@echo "$(YELLOW)------------------------$(RESET)"
 	@docker exec -it $(MDB_CONTAINER) bash -c "\
-	cat /var/log/mysql/error.log; echo "
+	cat /var/log/mysql/error.log || true " || true
 	
 	@echo "$(YELLOW)4. MARIADB General log: :$(RESET)"
 	@echo "$(YELLOW)------------------------$(RESET)"
 	@docker exec -it $(MDB_CONTAINER) bash -c "\
-	cat /var/log/mysql/mysql.log; echo "
+	cat /var/log/mysql/mysql.log || true " || true
 	
 access:
 	@echo "$(YELLOW)NGINX access log :$(RESET)"
 	@echo "$(YELLOW)-------------------$(RESET)"
 	@docker exec -it $(NGINX_CONTAINER) bash -c "\
-	cat /var/log/nginx/access.log; echo "
+	cat /var/log/nginx/access.log || true" || true
 	
 wp-config:
 	@docker exec -it $(WP_CONTAINER) bash -c "\
-	sed -n '23, 39p' /var/www/html/wp-config.php; \
+	sed -n '23, 39p' /var/www/html/wp-config.php || true; \
 	echo -e '\n\n' ; \
-	tail -n 11 /var/www/html/wp-config.php | head -n 2; echo " 
+	tail -n 11 /var/www/html/wp-config.php | head -n 2 || true " || true
 
+passwords:
+	@if [ -f ./secrets/wp_password.txt ]; then \
+	     i=1; \
+	     while IFS= read -r line; do \
+	        case $$i in \
+	          1) echo "DB USER = $$line" ;; \
+	          2) echo "SUPER USER = $$line" ;; \
+	    	  3) echo "REGULAR USER = $$line" ;; \
+	        esac; \
+	        i=$$((i+1)); \
+	     done < ./secrets/wp_password.txt; \
+	else \
+	     echo "Password file not found."; \
+	fi
+	
 commands:
 	@echo "Diagnostic commands available: "
 	@echo "-------------------------------"
+	@echo "access"
+	@echo "bash-m"
 	@echo "bash-n"
 	@echo "bash-w"
-	@echo "bash-m"
+	@echo "commands"
+	@echo "error"
+	@echo "list"
+	@echo "logs"
 	@echo "network"
+	@echo "passwords"
 	@echo "ping"
 	@echo "ports"
-	@echo "volume"
-	@echo "logs"
-	@echo "list"
 	@echo "version"
-	@echo "error"
-	@echo "access"
+	@echo "volume"
 	@echo "wp-config"
-	@echo "commands"
 	
 #validate TLS settings in NGINX
 

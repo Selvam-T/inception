@@ -2,18 +2,14 @@ ARG DEBIAN_VERSION=bullseye
 
 FROM debian:${DEBIAN_VERSION}
 
-RUN apt update && apt upgrade -y
-
-RUN apt install nginx -y
-
-RUN apt install openssl -y
-
-RUN apt install curl -y
-
-#for debugging network
-RUN apt install wget -y
-RUN apt install iputils-ping -y 
-RUN apt install iproute2 -y
+RUN apt update && apt upgrade -y && \
+    apt install -y \
+        nginx \
+        openssl \
+        curl \
+        wget \
+        iputils-ping \
+        iproute2
 
 # apt update downloads package lists, saves in /var/lib/apt/list/
 # clean up cached package lists to reduce image size
