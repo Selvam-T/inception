@@ -2,16 +2,17 @@ ARG DEBIAN_VERSION=bullseye
 
 FROM debian:${DEBIAN_VERSION}
 
-RUN apt update && apt upgrade -y
-RUN apt install -y mariadb-server
-RUN apt install -y mariadb-client
+RUN apt update && apt upgrade -y && \
+    apt install -y \
+        mariadb-server \
+        mariadb-client
 
-#configure MariaDB
-RUN mariadb-install-db --datadir=/var/lib/mysql --user=mysql
-RUN which mariadb-install-db >> /var/build_log
+#directory for database data 
+RUN mkdir -p /var/lib/mysql
 RUN chown -R mysql:mysql /var/lib/mysql
+RUN mariadb-install-db --datadir=/var/lib/mysql --user=mysql
 
-#directory for socket file with system user permission
+#directory for socket file
 RUN mkdir -p /run/mysqld 
 RUN chown mysql:mysql /run/mysqld
 

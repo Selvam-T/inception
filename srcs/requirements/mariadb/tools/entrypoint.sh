@@ -1,14 +1,23 @@
 #!/bin/bash
-echo -e "\033[36mExecuting entrypoint script in MariaDB ...\033[0m"
 
 set -e
+echo -e "\033[36mExecuting entrypoint script in MariaDB ...\033[0m"
 
 MYSQL_USER_PASSWORD=$(sed -n '1p' /run/secrets/wp_password)
 #MYSQL_ROOT_PASSWORD=$(cat /run/secrets/db_password) # not using here
 
+# mysqld_safe in 1. possibly automatically initialize MariaDB data directory 
+# so I don't need to run maria-install-db below
+#if [ ! -d "/var/lib/mysql/mysql" ]; then
+#    echo -e "\t. Initializing MariaDB data directory ..."
+#    mariadb-install-db --datadir=/var/lib/mysql --user=mysql
+#    which mariadb-install-db
+#fi
+
 #1. Start MySQL in the background
 echo -e "\t1. Starting MySQL in the background ..."
 mysqld_safe --datadir=/var/lib/mysql & pid="$!"
+
 
 #2. Blocks the subsequent line execution until the database is ready.
 until mysqladmin ping -h localhost --silent; do
