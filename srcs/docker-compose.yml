@@ -49,7 +49,7 @@ services:
       - app-network
     volumes:
       - wp_files:/var/www/html #wordpress files
-      #- ./requirements/wordpress/log:/var/log/php7.4-fpm.log #php-fpm logs
+      - ./requirements/wordpress/log:/var/log/ #php-fpm logs
     environment:
       PHP_FPM_BIND_ADDR: ${PHP_FPM_BIND_ADDR}
       PHP_FPM_PORT: ${PHP_FPM_PORT}
@@ -60,9 +60,6 @@ services:
       WORDPRESS_SUPER: ${WORDPRESS_SUPER}
       WORDPRESS_REGULAR: ${WORDPRESS_REGULAR}
       WORDPRESS_PASSWORD_FILE: "/run/secrets/wp_password"
-      WORDPRESS_CONFIG_EXTRA:
-        define('WP_HOME', 'https://${DOMAIN_NAME}:${PORT}');
-        define('WP_SITEURL', 'https://${DOMAIN_NAME}:${PORT}/wp-admin');
     env_file:
       - .env
     secrets:
@@ -80,14 +77,13 @@ services:
       - mysql_data:/var/lib/mysql
       - ./requirements/mariadb/tools/:/docker-entrypoint-initdb.d/
       - ./requirements/mariadb/conf/custom.conf:/etc/mysql/mariadb.conf.d/50-server.cnf
-      #- ./requirements/mariadb/log:/var/build_log #??
+      - ./requirements/mariadb/log:/var/log
     environment:
       MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
       MYSQL_USER: ${WORDPRESS_DB_USER}
       MYSQL_USER_PASSWORD_FILE: "/run/secrets/wp_password"
       MYSQL_ROOT_PASSWORD_FILE: "/run/secrets/db_password"
-    #stop_signal: SIGKILL
-      
+         
     env_file:
       - .env
     secrets:

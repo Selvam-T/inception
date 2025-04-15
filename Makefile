@@ -33,27 +33,51 @@ build:	init-host generate-ssl
 
 rebuild: down all
 
+rebuild-n:
+	@echo "$(YELLOW)Rebuilding Nginx...$(RESET)"
+	@docker compose -f ./srcs/docker-compose.yml stop nginx || true
+	@docker compose -f ./srcs/docker-compose.yml rm -f nginx || true
+	@echo "$(YELLOW)Nginx service is stopped and removed.$(RESET)"
+	@docker compose -f ./srcs/docker-compose.yml up -d nginx || true
+	@echo "$(YELLOW)Nginx service is up.$(RESET)"
+	
+rebuild-w:
+	@echo "$(YELLOW)Rebuilding WordPress...$(RESET)"
+	@docker compose -f ./srcs/docker-compose.yml stop wordpress || true
+	@docker compose -f ./srcs/docker-compose.yml rm -f wordpress || true
+	@echo "$(YELLOW)WordPress service is stopped and removed.$(RESET)"
+	@docker compose -f ./srcs/docker-compose.yml up -d wordpress || true
+	@echo "$(YELLOW)WordPress service is up.$(RESET)"
+	
+rebuild-m:
+	@echo "$(YELLOW)Rebuilding MariaDB...$(RESET)"
+	@docker compose -f ./srcs/docker-compose.yml stop mariadb || true
+	@docker compose -f ./srcs/docker-compose.yml rm -f mariadb || true
+	@echo "$(YELLOW)MariaDB service is stopped and removed.$(RESET)"
+	@docker compose -f ./srcs/docker-compose.yml up -d mariadb || true
+	@echo "$(YELLOW)MariaDB service is up.$(RESET)"
+
 up:
 	@echo "$(YELLOW)Starting the application in the background...$(RESET)"
-	@docker compose -f ./srcs/docker-compose.yml up -d
+	@docker compose -f ./srcs/docker-compose.yml up -d || true
 
 down:
 	@echo "$(YELLOW)Stopping and removing containers...$(RESET)"
-	@docker compose -f ./srcs/docker-compose.yml down --rmi all
+	@docker compose -f ./srcs/docker-compose.yml down --rmi all || true
 
 clean:	down rm-files
 	@echo "$(YELLOW)Remove unused images and volumes...$(RESET)"
-	@docker system prune -f >/dev/null 2>&1 # images
+	@docker system prune -f >/dev/null 2>&1 || true # images
 	
-	@docker volume prune -f >/dev/null 2>&1 # volumes
+	@docker volume prune -f >/dev/null 2>&1 || true # volumes
 
 	@echo "$(YELLOW)Remove MYSQL data and WordPress files on host...$(RESET)"
 	@if docker volume inspect srcs_mysql_data >/dev/null 2>&1; then \
-		docker volume rm srcs_mysql_data >/dev/null 2>&1; \
+		docker volume rm srcs_mysql_data >/dev/null 2>&1 || true; \
 		echo "\t$(GREEN)srcs_mysql_data removed !$(RESET)"; \
 	fi
 	@if docker volume inspect srcs_wp_files >/dev/null 2>&1; then \
-		docker volume rm srcs_wp_files >/dev/null 2>&1; \
+		docker volume rm srcs_wp_files >/dev/null 2>&1 || true; \
 		echo "\t$(GREEN)srcs_wp_files removed !$(RESET)"; \
 	fi
 
@@ -66,7 +90,7 @@ clean:	down rm-files
 	
 update:
 	@echo "$(YELLOW)Updating images...$(RESET)"
-	@docker compose -f ./srcs/docker-compose.yml pull
+	@docker compose -f ./srcs/docker-compose.yml pull || true
 	@$(MAKE) build
 
 init-host:
@@ -188,12 +212,36 @@ error:
 	@docker exec -it $(MDB_CONTAINER) bash -c "\
 	cat /var/log/mysql/mysql.log; echo "
 	
+access:
+	@echo "$(YELLOW)NGINX access log :$(RESET)"
+	@echo "$(YELLOW)-------------------$(RESET)"
+	@docker exec -it $(NGINX_CONTAINER) bash -c "\
+	cat /var/log/nginx/access.log; echo "
+	
 wp-config:
 	@docker exec -it $(WP_CONTAINER) bash -c "\
 	sed -n '23, 39p' /var/www/html/wp-config.php; \
 	echo -e '\n\n' ; \
 	tail -n 11 /var/www/html/wp-config.php | head -n 2; echo " 
 
+commands:
+	@echo "Diagnostic commands available: "
+	@echo "-------------------------------"
+	@echo "bash-n"
+	@echo "bash-w"
+	@echo "bash-m"
+	@echo "network"
+	@echo "ping"
+	@echo "ports"
+	@echo "volume"
+	@echo "logs"
+	@echo "list"
+	@echo "version"
+	@echo "error"
+	@echo "access"
+	@echo "wp-config"
+	@echo "commands"
+	
 #validate TLS settings in NGINX
 
 .PHONY:	build up down clean logs update version

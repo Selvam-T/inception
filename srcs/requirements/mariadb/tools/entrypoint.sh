@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Executing entrypoint script in MariaDB ..."
+echo -e "\033[36mExecuting entrypoint script in MariaDB ...\033[0m"
 
 set -e
 

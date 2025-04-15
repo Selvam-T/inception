@@ -10,7 +10,7 @@ RUN apt update && apt upgrade -y
 RUN apt install wget -y
 
 # B) php7.4 default version for bullseye
-RUN apt install php${PHP_VER} -y
+# RUN apt install php${PHP_VER} -y
 
 # C) latest stable version is 8.4
 RUN apt install php-fpm -y
