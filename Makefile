@@ -152,10 +152,10 @@ list:
 	@docker images || true
 	@echo "$(YELLOW)2. Listing running containers :$(RESET)"
 	@echo "$(YELLOW)-------------------------------$(RESET)"
-	@docker ps || true
+	@docker ps --format 'table {{.ID}}\t{{.Image}}\t{{.Command}}\t{{.Status}}\t{{.Names}}' || true
 	@echo "$(YELLOW)3. Listing all containers :$(RESET)"
 	@echo "$(YELLOW)---------------------------$(RESET)"
-	@docker ps -a || true
+	@docker ps -a --format 'table {{.ID}}\t{{.Image}}\t{{.Command}}\t{{.Status}}\t{{.Names}}' || true
 	@echo "$(YELLOW)4. Listing docker compose services :$(RESET)"
 	@echo "$(YELLOW)------------------------------------$(RESET)"
 	@docker compose -f ./srcs/docker-compose.yml config --services || true
@@ -181,6 +181,7 @@ version:
 	echo -n 'WordPress Version: '; wp core version --path=/var/www/html --allow-root 2>/dev/null\
 	|| echo 'Not installed'; \
 	wp --version --allow-root 2>/dev/null || echo 'Not installed'; \
+	curl -V | head -n 1 | awk -F'libcurl' '{print \$$1}'; \
 	ping -V; \
 	ip -V; echo " || true
 	
@@ -197,17 +198,22 @@ error:
 	@docker exec -it $(NGINX_CONTAINER) bash -c "\
 	cat /var/log/nginx/error.log || true " || true
 	
-	@echo "$(YELLOW)2. PHP-FPM error log: :$(RESET)"
+	@echo "$(YELLOW)2. Fastcgi error log :$(RESET)"
+	@echo "$(YELLOW)--------------------$(RESET)"
+	@docker exec -it $(NGINX_CONTAINER) bash -c "\
+	cat /var/log/nginx/fastcgi_error.log || true " || true
+	
+	@echo "$(YELLOW)3. PHP-FPM error log: :$(RESET)"
 	@echo "$(YELLOW)------------------------$(RESET)"
 	@docker exec -it $(WP_CONTAINER) bash -c "\
 	cat /var/log/php7.4-fpm.log || true " || true
 	
-	@echo "$(YELLOW)3. MARIADB error log: :$(RESET)"
+	@echo "$(YELLOW)4. MARIADB error log: :$(RESET)"
 	@echo "$(YELLOW)------------------------$(RESET)"
 	@docker exec -it $(MDB_CONTAINER) bash -c "\
 	cat /var/log/mysql/error.log || true " || true
 	
-	@echo "$(YELLOW)4. MARIADB General log: :$(RESET)"
+	@echo "$(YELLOW)5. MARIADB General log: :$(RESET)"
 	@echo "$(YELLOW)------------------------$(RESET)"
 	@docker exec -it $(MDB_CONTAINER) bash -c "\
 	cat /var/log/mysql/mysql.log || true " || true
@@ -244,7 +250,22 @@ passwords:
 mysql:
 	@docker exec -it $(MDB_CONTAINER) bash -c "\
 	mysql -u root " || true
-commands:
+
+php-fpm:
+	@echo "$(YELLOW)PHP-FPM Process Check:$(RESET)"
+	@docker exec -it $(WP_CONTAINER) bash -c "\
+	ps aux " || true
+	
+	@echo "$(YELLOW)Local PHP-FPM connectivity:$(RESET)"
+	@docker exec -it $(WP_CONTAINER) bash -c "\
+	curl -v http://sthiagar.42.fr:9000 " || true
+	
+	@echo "$(YELLOW)Nginx to PHP-FPM Connectivity:$(RESET)"
+	@docker exec -it $(NGINX_CONTAINER) bash -c "\
+	curl -v http://sthiagar.42.fr:9000 " || true
+
+	
+commands_d:
 	@echo "Diagnostic commands available: "
 	@echo "-------------------------------"
 	@echo "access     HTTP request log"
@@ -268,8 +289,10 @@ commands:
 	@echo
 	@echo "mysql      launch MySQL client"
 	@echo
-	@echo "commands   list make directives"
-	@echo
+	@echo "commands_d"
+	@echo "commands_a"
+	
+commands_a:
 	@echo "Docker commands available: "
 	@echo "-------------------------------"
 	@echo "all"

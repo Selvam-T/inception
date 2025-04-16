@@ -9,9 +9,10 @@ WORKDIR /var/www/html
 RUN apt update && apt upgrade -y && \
     apt install -y \
         wget \
-        php-fpm \
-        php-mysql \
+        php7.4-fpm \
+        php7.4-mysql \
         mariadb-client \
+        curl \
         iputils-ping \
         iproute2
 
