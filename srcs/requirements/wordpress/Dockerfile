@@ -5,7 +5,7 @@ FROM debian:${DEBIAN_VERSION}
 
 WORKDIR /var/www/html
 
-# A) install tools
+# install tools
 RUN apt update && apt upgrade -y && \
     apt install -y \
         wget \
@@ -17,10 +17,8 @@ RUN apt update && apt upgrade -y && \
 
 #remove installation files
 RUN rm -rf /var/lib/apt/lists/*
-
-# DONT NEED TO INSTALL THIS        
-# B) php7.4 default version for bullseye
-# RUN apt install php${PHP_VER} -y
+    
+# php7.4 default version for bullseye is automatically installed with php-fpm
 
 #download and install wordpress
 RUN wget https://wordpress.org/latest.tar.gz

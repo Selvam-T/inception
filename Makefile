@@ -226,37 +226,62 @@ wp-config:
 
 passwords:
 	@if [ -f ./secrets/wp_password.txt ]; then \
+	     echo "TYPE           USER             PASSWORD"; \
+	     echo "----           ----             --------"; \
 	     i=1; \
 	     while IFS= read -r line; do \
 	        case $$i in \
-	          1) echo "DB USER = $$line" ;; \
-	          2) echo "SUPER USER = $$line" ;; \
-	    	  3) echo "REGULAR USER = $$line" ;; \
+	          1) echo "DB USER      = $(WORDPRESS_DB_USER)    : $$line" ;; \
+	          2) echo "SUPER USER   = $(WORDPRESS_SUPER)   : $$line" ;; \
+	    	  3) echo "REGULAR USER = $(WORDPRESS_REGULAR) : $$line" ;; \
 	        esac; \
 	        i=$$((i+1)); \
 	     done < ./secrets/wp_password.txt; \
 	else \
 	     echo "Password file not found."; \
 	fi
-	
+
+mysql:
+	@docker exec -it $(MDB_CONTAINER) bash -c "\
+	mysql -u root " || true
 commands:
 	@echo "Diagnostic commands available: "
 	@echo "-------------------------------"
-	@echo "access"
-	@echo "bash-m"
-	@echo "bash-n"
-	@echo "bash-w"
-	@echo "commands"
-	@echo "error"
-	@echo "list"
-	@echo "logs"
-	@echo "network"
-	@echo "passwords"
-	@echo "ping"
-	@echo "ports"
-	@echo "version"
-	@echo "volume"
-	@echo "wp-config"
+	@echo "access     HTTP request log"
+	@echo "error      error log"
+	@echo "logs       docker compose log"
+	@echo
+	@echo "bash-m     Mariadb bash"
+	@echo "bash-n     Nginx bash"
+	@echo "bash-w     WordPress bash"
+	@echo
+	@echo "list       images, containers, services"
+	@echo "version    applications installed in containers"
+	@echo "wp-config  WordPress configuration settings"
+	@echo
+	@echo "network    docker network"
+	@echo "ping       network connectivity"
+	@echo "ports      exposed Ports on containers"
+	@echo
+	@echo "volume     name and device path"
+	@echo "passwords  WordPress passwords"
+	@echo
+	@echo "mysql      launch MySQL client"
+	@echo
+	@echo "commands   list make directives"
+	@echo
+	@echo "Docker commands available: "
+	@echo "-------------------------------"
+	@echo "all"
+	@echo "build"
+	@echo "rebuild"
+	@echo "rebuild-n"
+	@echo "rebuild-w"
+	@echo "rebuild-m"
+	@echo "up"
+	@echo "down"
+	@echo "clean"
+	@echo "update"
 	
 #validate TLS settings in NGINX
 
