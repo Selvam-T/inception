@@ -283,6 +283,7 @@ commands_d:
 	@echo "network    docker network"
 	@echo "ping       network connectivity"
 	@echo "ports      exposed Ports on containers"
+	@echo "php-fpm    PHP-FPM configuration and connection"
 	@echo
 	@echo "volume     name and device path"
 	@echo "passwords  WordPress passwords"

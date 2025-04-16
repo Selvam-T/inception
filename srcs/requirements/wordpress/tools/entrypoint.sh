@@ -19,9 +19,11 @@ if ! [ -f /var/www/html/wp-config.php ] > /dev/null 2>&1; then
             --allow-root \
             --skip-check
 
-        wp config set WP_HOME "https://${DOMAIN_NAME}:${PORT}" \
+        #wp config set WP_HOME "https://${DOMAIN_NAME}:${PORT}" \
+        wp config set WP_HOME "https://${DOMAIN_NAME}" \
             --type=constant --path=/var/www/html --allow-root
-        wp config set WP_SITEURL "https://${DOMAIN_NAME}:${PORT}" \
+        #wp config set WP_SITEURL "https://${DOMAIN_NAME}:${PORT}" \
+        wp config set WP_SITEURL "https://${DOMAIN_NAME}" \
             --type=constant --path=/var/www/html --allow-root
         echo -e "\t1/6. wp-config.php created in WordPress container!"
 else
