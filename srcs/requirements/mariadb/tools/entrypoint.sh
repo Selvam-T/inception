@@ -3,10 +3,10 @@
 set -e
 echo -e "\033[36mExecuting entrypoint script in MariaDB ...\033[0m"
 
-MYSQL_USER_PASSWORD=$(sed -n '1p' /run/secrets/wp_password)
-#MYSQL_ROOT_PASSWORD=$(cat /run/secrets/db_password) # not using here
+MYSQL_USER_PASSWORD=$(sed -n '1p' /run/secrets/db_password)
+MYSQL_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
 
-# mysqld_safe in 1. possibly automatically initialize MariaDB data directory 
+# mysqld_safe in 1. possibly automatically initializeS MariaDB data directory 
 # so I don't need to run maria-install-db below
 #if [ ! -d "/var/lib/mysql/mysql" ]; then
 #    echo -e "\t. Initializing MariaDB data directory ..."
@@ -31,8 +31,9 @@ if [ -f "/docker-entrypoint-initdb.d/init.sql" ]; then
     
     sed "s/\__MYSQL_DATABASE__/$MYSQL_DATABASE/g; \
         s/\__MYSQL_USER__/$MYSQL_USER/g; \
-        s/\__MYSQL_USER_PASSWORD__/$MYSQL_USER_PASSWORD/g" \
-        /docker-entrypoint-initdb.d/init.sql | mysql
+        s/\__MYSQL_USER_PASSWORD__/$MYSQL_USER_PASSWORD/g; \
+        s/\__MYSQL_ROOT_PASSWORD__/$MYSQL_ROOT_PASSWORD/g" \
+        /docker-entrypoint-initdb.d/init.sql | mysql -u root -p"$MYSQL_ROOT_PASSWORD"
 else
     echo -e "\t\033[31m3/4Error: Initialization script not found!\033[0m"
 fi
@@ -41,4 +42,3 @@ fi
 echo -e "\t4/4. MySQL is ready to accept connections ..."
 wait $pid
 
-#5. Check if Database, Users table in Database is created

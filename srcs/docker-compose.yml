@@ -12,7 +12,7 @@
 
 services:
   nginx:
-    image: "${NGINX_IMG:-nginx}"
+    #image: "${NGINX_IMG:-nginx}"
     build:
       context: ./requirements/nginx
       args:
@@ -37,7 +37,7 @@ services:
     container_name: "${NGINX_CONTAINER:-mynginx}"
   
   wordpress:
-    image: "${WORDPRESS_IMG:-wordpress}"
+    #image: "${WORDPRESS_IMG:-wordpress}"
     build:
       context: ./requirements/wordpress
       args:
@@ -59,16 +59,16 @@ services:
       WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
       WORDPRESS_SUPER: ${WORDPRESS_SUPER}
       WORDPRESS_REGULAR: ${WORDPRESS_REGULAR}
-      WORDPRESS_PASSWORD_FILE: "/run/secrets/wp_password"
+      WORDPRESS_PASSWORD_FILE: "/run/secrets/db_password"
     env_file:
       - .env
     secrets:
-      - wp_password
+      - db_password
     container_name: "${WP_CONTAINER:-mywordpress}"
     restart: always
 
   mariadb:
-    image: "${MARIADB_IMG:-mariadb}"
+    #image: "${MARIADB_IMG:-mariadb}"
     build:
       context: ./requirements/mariadb
     networks:
@@ -81,14 +81,14 @@ services:
     environment:
       MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
       MYSQL_USER: ${WORDPRESS_DB_USER}
-      MYSQL_USER_PASSWORD_FILE: "/run/secrets/wp_password"
-      MYSQL_ROOT_PASSWORD_FILE: "/run/secrets/db_password"
+      MYSQL_USER_PASSWORD_FILE: "/run/secrets/db_password"
+      MYSQL_ROOT_PASSWORD_FILE: "/run/secrets/db_root_password"
          
     env_file:
       - .env
     secrets:
-      - wp_password
       - db_password
+      - db_root_password
     container_name: "${MDB_CONTAINER:-mymariadb}"
     restart: always
     healthcheck:
@@ -117,9 +117,9 @@ volumes:
       device: ${MYSQL_DATA}
       
 secrets:
-  wp_password:
-    file: ${WORDPRESS_PASSWORD_FILE}
   db_password:
+    file: ${WORDPRESS_PASSWORD_FILE}
+  db_root_password:
     file: ${MYSQL_ROOT_PASSWORD_FILE}
   key:
     file: ${SSL_KEY}

@@ -1,0 +1,15 @@
+# Ignore Docker-related stuff
+*.log
+*.pid
+*.sock
+
+# Ignore editor and OS junk
+*.swp
+*.swo
+*.bak
+*.tmp
+*~
+.DS_Store
+
+# Ignore local config or env files
+.env

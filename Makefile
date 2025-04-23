@@ -10,15 +10,23 @@
 #                                                                              #
 # **************************************************************************** #
 
-include ./srcs/.env
-
 PROJECT_NAME =	inception
 
 YELLOW = \033[33m
 GREEN = \033[32m
 RESET = \033[0m 
 
-all:	build up
+-include ./srcs/.env
+
+.DEFAULT_GOAL := all
+
+all:	prepare build up
+
+prepare: ./srcs/.env 
+
+./srcs/.env:
+	@echo "$(YELLOW)Added ./srcs/.env from inception repository $(RESET)"
+	@cp /home/sthiagar/inception/srcs/.env ./srcs/.env
 
 build:	init-host generate-ssl
 	@echo "$(YELLOW)Building Docker images with Debian...$(RESET)"
@@ -96,11 +104,12 @@ update:
 init-host:
 	@./inithost.sh
 
+generate-ssl:
+	@./generate_ssl.sh
+	
 rm-files:
 	@ROOT_PWD=$(ROOT_PWD) ./rmfiles.sh
 
-generate-ssl:
-	@./generate_ssl.sh
 
 # ******************** DIAGNOSTIC COMMANDS ********************** #
 bash-w:
@@ -231,7 +240,7 @@ wp-config:
 	tail -n 11 /var/www/html/wp-config.php | head -n 2 || true " || true
 
 passwords:
-	@if [ -f ./secrets/wp_password.txt ]; then \
+	@if [ -f ./secrets/db_password.txt ]; then \
 	     echo "TYPE           USER             PASSWORD"; \
 	     echo "----           ----             --------"; \
 	     i=1; \
@@ -242,29 +251,27 @@ passwords:
 	    	  3) echo "REGULAR USER = $(WORDPRESS_REGULAR) : $$line" ;; \
 	        esac; \
 	        i=$$((i+1)); \
-	     done < ./secrets/wp_password.txt; \
+	     done < ./secrets/db_password.txt; \
 	else \
-	     echo "Password file not found."; \
+	     echo "WordPress password file not found."; \
+	fi
+	
+	@if [ -f ./secrets/db_root_password.txt ]; then \
+	    IFS= read -r line < ./secrets/db_root_password.txt; \
+	    echo "\nMYSQL_ROOT   = root             : $$line"; \
+	else \
+	     echo "DB password file not found."; \
 	fi
 
 mysql:
 	@docker exec -it $(MDB_CONTAINER) bash -c "\
-	mysql -u root " || true
+	mysql -u root -p" || true
 
 php-fpm:
 	@echo "$(YELLOW)PHP-FPM Process Check:$(RESET)"
 	@docker exec -it $(WP_CONTAINER) bash -c "\
 	ps aux " || true
-	
-	@echo "$(YELLOW)Local PHP-FPM connectivity:$(RESET)"
-	@docker exec -it $(WP_CONTAINER) bash -c "\
-	curl -v http://sthiagar.42.fr:9000 " || true
-	
-	@echo "$(YELLOW)Nginx to PHP-FPM Connectivity:$(RESET)"
-	@docker exec -it $(NGINX_CONTAINER) bash -c "\
-	curl -v http://sthiagar.42.fr:9000 " || true
 
-	
 commands_d:
 	@echo "Diagnostic commands available: "
 	@echo "-------------------------------"
@@ -309,4 +316,4 @@ commands_a:
 	
 #validate TLS settings in NGINX
 
-.PHONY:	build up down clean logs update version
+.PHONY:	prepare all build up down clean logs update version

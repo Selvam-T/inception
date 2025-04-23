@@ -4,9 +4,9 @@ echo -e "\033[36mExecuting entrypoint script in WordPress ...\033[0m"
 set -e
 VER=${PHP_VER}
 
-DBUSER_PASSWORD=$(sed -n '1p' /run/secrets/wp_password) # add to wp-config file
-SUP_PASSWORD=$(sed -n '2p' /run/secrets/wp_password) # add to Table
-REG_PASSWORD=$(sed -n '3p' /run/secrets/wp_password) # add to Table
+DBUSER_PASSWORD=$(sed -n '1p' /run/secrets/db_password) # add to wp-config file
+SUP_PASSWORD=$(sed -n '2p' /run/secrets/db_password) # add to Table
+REG_PASSWORD=$(sed -n '3p' /run/secrets/db_password) # add to Table
 
 # 1) wp-config.php
 if ! [ -f /var/www/html/wp-config.php ] > /dev/null 2>&1; then
